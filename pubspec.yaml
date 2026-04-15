@@ -14,27 +14,27 @@ dependencies:
   cached_network_image: ^3.3.1
   google_fonts: ^6.2.1
   shimmer: ^3.0.0
+  image_picker: ^1.2.1
+  # Añadido para gestionar la API Key de Anthropic de forma segura
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  # 1. Añade esta dependencia aquí
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/Escudo_sabor.png"
-  # Aquí ponemos el color crema de tu app para que "se coma" cualquier borde
   adaptive_icon_background: "#F8F4F0" 
   adaptive_icon_foreground: "assets/images/Escudo_sabor.png"
-  # Aumenta el inset a 20. Esto encogerá la imagen dentro del icono, 
-  # haciendo que los bordes ajedrezados queden fuera del área visible (el círculo)
   adaptive_icon_foreground_inset: 20
 
 flutter:
   uses-material-design: true
-  # 3. Asegúrate de registrar la carpeta de assets
   assets:
     - assets/images/
+    # Es fundamental registrar el archivo .env como un asset para que Flutter pueda leerlo
+    - .env

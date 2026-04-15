@@ -4,9 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import '../models/meal.dart';
 import '../services/meal_service.dart';
-import '../utils/translator.dart'; // Importamos el traductor
 import 'category_screen.dart';
 import 'search_screen.dart';
+import 'ingredient_scan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,20 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      setState(() {
-        _loading = true;
-        _error = null;
-      });
+      setState(() { _loading = true; _error = null; });
       final cats = await _service.getCategories();
-      setState(() {
-        _categories = cats;
-        _loading = false;
-      });
+      setState(() { _categories = cats; _loading = false; });
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
+      setState(() { _error = e.toString(); _loading = false; });
     }
   }
 
@@ -58,6 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           SliverToBoxAdapter(
             child: _buildSearchButton(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildAiBanner(),
           ),
           SliverToBoxAdapter(
             child: _buildSectionTitle('Categorías'),
@@ -99,26 +93,17 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 0,
       title: Row(
         children: [
-          // Aplicamos tu icono personalizado Escudo_sabor.png
-          Image.asset(
-            'assets/images/Escudo_sabor.png',
-            height: 32,
-            errorBuilder: (context, error, stackTrace) {
-              // Fallback en caso de que la imagen no cargue
-              return Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE8490F),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.restaurant, color: Colors.white, size: 20),
-              );
-            },
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8490F),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.restaurant, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 10),
           Text(
-            // Aplicamos la traducción a "Recetario"
-            Translator.category('RecipeBook'), 
+            'RecipeBook',
             style: GoogleFonts.playfairDisplay(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -199,6 +184,74 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: const Color(0xFFAAAAAA),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiBanner() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: GestureDetector(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const IngredientScanScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFE8490F), Color(0xFFFF7A45)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFE8490F).withOpacity(0.35),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.auto_awesome,
+                    color: Colors.white, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Chef IA',
+                      style: GoogleFonts.playfairDisplay(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Foto o lista → recetas al instante',
+                      style: GoogleFonts.nunito(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios,
+                  color: Colors.white70, size: 16),
             ],
           ),
         ),
@@ -336,7 +389,7 @@ class _CategoryCard extends StatelessWidget {
                 left: 12,
                 right: 12,
                 child: Text(
-                  Translator.category(category.name),
+                  category.name,
                   style: GoogleFonts.playfairDisplay(
                     color: Colors.white,
                     fontSize: 16,
