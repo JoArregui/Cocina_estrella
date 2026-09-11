@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'ai_service.dart';
 import 'gemini_service.dart';
@@ -30,7 +31,16 @@ class OpenRouterService implements AIService {
 
   OpenRouterService({http.Client? client}) : _client = client ?? http.Client();
 
-  static String get apiKey => const String.fromEnvironment('OPENROUTER_API_KEY');
+  static String get apiKey {
+    const dartDefine = String.fromEnvironment('OPENROUTER_API_KEY');
+    if (dartDefine.isNotEmpty) return dartDefine;
+    try {
+      final env = dotenv.maybeGet('OPENROUTER_API_KEY');
+      if (env != null && env.isNotEmpty) return env;
+    } catch (_) {}
+    return '';
+  }
+
   static String get aiProvider => const String.fromEnvironment('AI_PROVIDER', defaultValue: 'muse-spark');
   static String get customModel => const String.fromEnvironment('AI_MODEL');
 

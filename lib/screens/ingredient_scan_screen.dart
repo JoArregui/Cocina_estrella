@@ -65,7 +65,9 @@ class _IngredientScanScreenState extends ConsumerState<IngredientScanScreen> wit
             ? 'Nemotron'
             : ai.providerName.contains('proxy')
                 ? 'Proxy'
-                : 'Gemini';
+                : ai.providerName.contains('local')
+                    ? 'Local'
+                    : 'Gemini';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F4F0),

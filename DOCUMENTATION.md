@@ -39,6 +39,7 @@
 - **Chef IA:** Dos modos — *Escribir lista* o *Foto ingredientes* (`lib/screens/ingredient_scan_screen.dart:96`). Detecta ingredientes y sugiere 5 platos con `match_percent`. Soporta Gemini y OpenRouter Muse Spark/Nemotron/Vision (`lib/services/openrouter_service.dart:14`), badge dinámico.
 - **Generación IA completa:** `AiRecipeGenerator` (`lib/services/ai_recipe_generator.dart:1`) genera receta completa `Meal` JSON desde prompt o ingredientes, usado en formulario (`lib/screens/recipe_form_screen.dart:84` botón IA).
 - **Recetario local:** CRUD 100% offline en `user_recipes` SQLite (`lib/data/app_database.dart:8` v3, `lib/services/local_recipe_service.dart:1`), pantallas `RecipeFormScreen` y `UserRecipesScreen` (`lib/screens/user_recipes_screen.dart:1`), sección horizontal en Home y navegación (`lib/screens/home_screen.dart:27`).
+- **Búsqueda web automática:** Al abrir detalle, `WebSearchService` (`lib/services/web_search_service.dart:1`) toma `meal.name` y devuelve 5-10 enlaces (Brave/Bing/SerpAPI si hay key, si no enlaces curados 100% free: Google, YouTube, Bing, DuckDuckGo, Wikipedia, Tasty, Allrecipes, Cookpad). Sección `_WebSearchSection` (`lib/screens/recipe_detail_screen.dart:330`) en `RecipeDetailScreen` con `webSearchProvider`.
 - **Modo Cocinero:** 2 fases, timers (`lib/utils/timer_parser.dart:1`), `wakelock_plus` (`lib/screens/cooking_mode_screen.dart:13`), progreso y celebración.
 - **Favoritos:** Toggle corazón (`lib/screens/recipe_detail_screen.dart:46`), listado offline (`lib/screens/favorites_screen.dart:1`), persistencia dual Hive + SQLite.
 - **Cache offline:** Categorías, platos por categoría/área/ingrediente y detalle cacheados.
@@ -51,7 +52,7 @@
 |------|----------|-----|
 | UI | `flutter`, `google_fonts: ^6.2.1`, `cached_network_image: ^3.3.1`, `shimmer: ^3.0.0` | Tipografía Playfair/Nunito, imágenes cacheadas, skeletons |
 | Estado | `flutter_riverpod: ^2.6.1` | Providers, StateNotifier (`lib/providers/providers.dart:1`) |
-| Red | `http: ^1.2.1` | TheMealDB, Gemini, OpenRouter |
+| Red | `http: ^1.2.1` | TheMealDB, Gemini, OpenRouter, Brave/Bing/SerpAPI (opcional) |
 | Media | `image_picker: ^1.2.1` | Cámara/galería |
 | Persistencia | `hive_flutter: ^1.1.0`, `hive: ^2.2.3`, `sqflite: ^2.4.2+1`, `sqlite3_flutter_libs`, `shared_preferences: ^2.5.5`, `path_provider`, `path: ^1.9.1`, `uuid: ^4.5.3` | Cache, favoritos y recetas usuario |
 | Util | `flutter_dotenv: ^6.0.0`, `wakelock_plus: ^1.7.0`, `intl: 0.20.2`, `flutter_localizations` (SDK), `translator: ^1.0.0` | Env, wakelock, i18n, traducción scraper |
@@ -67,8 +68,8 @@
 UI (ConsumerWidget/ConsumerStatefulWidget)
   → Providers (Riverpod FutureProvider/StateNotifierProvider)
     → Repositories (MealRepository, UnifiedRecipeRepository)
-      → Services (MealService, SpoonacularService, AIService/GeminiService/OpenRouterService/AiRecipeGenerator, FavoritesService, LocalRecipeService)
-        → Data Sources (TheMealDB API, Spoonacular API, Hive Box, AppDatabase SQLite v3)
+      → Services (MealService, SpoonacularService, WebSearchService, AIService/GeminiService/OpenRouterService/AiRecipeGenerator, FavoritesService, LocalRecipeService)
+        → Data Sources (TheMealDB API, Spoonacular API, Brave/Bing/SerpAPI, Hive Box, AppDatabase SQLite v3)
 ```
 
 - **Inyección:** `http.Client` inyectable en `MealService` (`lib/services/meal_service.dart:14`) y `OpenRouterService` para tests con `MockClient`.
@@ -100,6 +101,7 @@ lib/
 │   ├── openrouter_service.dart       # Muse Spark / Nemotron / Vision free
 │   ├── ai_recipe_generator.dart      # generación receta completa IA (prompt→Meal)
 │   ├── spoonacular_service.dart      # Spoonacular +5k recetas (fallback)
+│   ├── web_search_service.dart       # búsqueda web automática 5-10 enlaces (Brave/Bing/curado)
 │   ├── meal_service.dart             # TheMealDB CRUD + getAreas/Ingredient/random
 │   ├── favorites_service.dart        # Hive + AppDatabase dual
 │   └── local_recipe_service.dart     # CRUD user_recipes (uuid)
@@ -107,7 +109,7 @@ lib/
 │   ├── meal_repository.dart          # cache Hive/JSON + SQLite
 │   └── unified_recipe_repository.dart # agregador TheMealDB + Spoonacular + cache
 ├── providers/
-│   └── providers.dart                # Riverpod: mealService, spoonacular, unified, localRecipe, aiRecipeGenerator, cacheBox, categories, mealsByCategory/Area/Ingredient, mealDetail/localMeal, search, favorites, chefIa, userRecipes, randomMeal, areas, ingredients
+│   └── providers.dart                # Riverpod: mealService, spoonacular, webSearch, unified, localRecipe, aiRecipeGenerator, cacheBox, categories, mealsByCategory/Area/Ingredient, mealDetail/localMeal, search, favorites, chefIa, userRecipes, randomMeal, areas, ingredients, webSearch
 ├── data/
 │   └── app_database.dart             # sqflite v3: favorites, cached_meals, cached_categories, user_recipes, migración v1→v3
 ├── utils/
@@ -159,6 +161,7 @@ proxy/README.md                       # ejemplo Cloud Function proxy Gemini
 | `GEMINI_API_KEY` | `ApiKeyService.getKey()` (`lib/utils/api_key_service.dart:7`) | Fallback Gemini si no hay OpenRouter |
 | `GEMINI_PROXY_URL` | `String.fromEnvironment` (`lib/services/gemini_service.dart:54`) | Backend que custodia key: `POST $proxy/analyze` |
 | `SPOONACULAR_API_KEY` | `String.fromEnvironment` (`lib/services/spoonacular_service.dart:16`) | Opcional +5k recetas Spoonacular (150 req/día free, fallback TheMealDB si ausente) |
+| `BRAVE_API_KEY` / `BING_API_KEY` / `SERPAPI_API_KEY` | `String.fromEnvironment` (`lib/services/web_search_service.dart:14`) | Opcional búsqueda real 5-10 resultados (Brave 2000/mes free, Bing 1000/mes). Sin key usa enlaces curados 100% free (Google, YouTube, etc.) |
 
 **Ejemplos:**
 
@@ -301,7 +304,7 @@ Reemplaza `withOpacity` deprecated por `withValues(alpha:)` en todos los screens
 | `CategoryScreen` (`lib/screens/category_screen.dart:1`) | `ConsumerWidget` | `mealsByCategoryProvider` | `SliverAppBar` 220 con `Translator.category`, grid `MealCard` (`/medium`). |
 | `SearchScreen` (`lib/screens/search_screen.dart:1`) | `ConsumerStatefulWidget` | `searchQueryProvider` + `searchResultsProvider` (usa `UnifiedRecipeRepository` fallback Spoonacular) | Debounce 500 ms, estados. |
 | `ExploreFiltersScreen` (`lib/screens/explore_filters_screen.dart:1`) | `ConsumerStatefulWidget` | `areasProvider`/`ingredientsProvider` + `mealsByAreaProvider`/`mealsByIngredientProvider` | Chips `ChoiceChip` (20 áreas con `Translator.area`, 20 ingredientes), grid resultados `MealCard` → `RecipeDetailScreen`. |
-| `RecipeDetailScreen` (`lib/screens/recipe_detail_screen.dart:1`) | `ConsumerStatefulWidget` | `mealDetailProvider` / `localMealProvider` (si `isLocal`/`user_`) | `SliverAppBar` 280, favoritos, FAB Modo Cocinero, soporte `localMeal` (IA efímera) y recetas `sp_`/`ai_`. |
+| `RecipeDetailScreen` (`lib/screens/recipe_detail_screen.dart:1`) | `ConsumerStatefulWidget` | `mealDetailProvider` / `localMealProvider` + `webSearchProvider(dishName)` | `CustomScrollView` con `SliverAppBar` 340 + ingredientes `SliverList` + preparación `SliverList` + `_WebSearchSection` (5-10 enlaces `WebSearchService`, `url_launcher`), FAB Modo Cocinero, soporte `isLocal`/`sp_`/`ai_`. |
 | `RecipeFormScreen` (`lib/screens/recipe_form_screen.dart:1`) | `ConsumerStatefulWidget` | `localRecipeServiceProvider` + `aiRecipeGeneratorProvider` | Form `nombre/categoría/origen/imagen/ingredientes/instrucciones`, add ingrediente, botón IA `generateFromPrompt` (autorrelena), guardar `create`/`update` → `RecipeDetailScreen(isLocal:true)`. |
 | `UserRecipesScreen` (`lib/screens/user_recipes_screen.dart:1`) | `ConsumerWidget` | `userRecipesProvider` | Grid `MealSummary` con `Dismissible` delete, FAB Nueva → `RecipeFormScreen`. |
 | `IngredientScanScreen` (`lib/screens/ingredient_scan_screen.dart:1`) | `ConsumerStatefulWidget` | `chefIaProvider` + `aiServiceProvider` badge | Toggle, `_analyze` → `ChefIa`, `SuggestionCard` → `RecipeDetail` o `CookingMode`. |
@@ -323,9 +326,11 @@ MealSummary {id, name, thumbnail; fromJson}
 MealCategory {name, thumbnail, description; fromJson}
 ```
 
-**MealService** (`lib/services/meal_service.dart:1`): `_baseUrl`, `_timeout 10s`, `_get()`. `getCategories`, `getMealsByCategory`, `searchMeals`, `getMealById` (traducción), `getAreas()`/`getMealsByArea()`/`getMealsByIngredient()`/`getIngredientList()` (`list.php`), `getRandomMeal()` ahora traducida, `dispose()`.
+**MealService** (`lib/services/meal_service.dart:1`): `_baseUrl`, `_timeout 10s`, `_get()`. `getCategories`, `getMealsByCategory`, `searchMeals`, `getMealById` (traducción), `getAreas()`/`getMealsByArea()`/`getMealsByIngredient()`/`getIngredientList()` (`list.php`), `getRandomMeal()` traducida, `dispose()`.
 
-**SpoonacularService** / **LocalRecipeService** / **AiRecipeGenerator** ver §7 y §6.4.
+**SpoonacularService** (`lib/services/spoonacular_service.dart:1`) / **LocalRecipeService** (`lib/services/local_recipe_service.dart:1`) / **AiRecipeGenerator** (`lib/services/ai_recipe_generator.dart:1`) ver §7 y §6.4.
+
+**WebSearchService** (`lib/services/web_search_service.dart:1`): `searchDish(dishName)` → `List<WebSearchResult>{title,url,snippet,source}`. Intenta Brave (`BRAVE_API_KEY`), Bing, SerpAPI; fallback `_curatedLinks` 8 enlaces (Google, YouTube, Bing, DuckDuckGo, Wikipedia, Tasty, Allrecipes, Cookpad) 100% free. Consumido por `webSearchProvider` en `RecipeDetailScreen`.
 
 **AIService** ver §6.
 
@@ -409,8 +414,10 @@ cp .env.example .env  # solo dev
 # Solo TheMealDB + local (sin keys)
 flutter run
 
-# Óptimo FREE +5k + IA (Muse Spark + Spoonacular)
-flutter run --dart-define=OPENROUTER_API_KEY=sk-or-... --dart-define=AI_PROVIDER=muse-spark --dart-define=SPOONACULAR_API_KEY=abc123
+# Óptimo FREE +5k + IA (Muse Spark + Spoonacular) + búsqueda web real
+flutter run --dart-define=OPENROUTER_API_KEY=sk-or-... --dart-define=AI_PROVIDER=muse-spark --dart-define=SPOONACULAR_API_KEY=abc123 --dart-define=BRAVE_API_KEY=...
+
+# Solo enlaces curados (sin BRAVE_API_KEY) también funciona: muestra Google/YouTube/Wikipedia etc.
 
 # Explorar filtros (usa nuevas áreas/ingredientes)
 # Home → Explorar / Aleatoria / Mis recetas

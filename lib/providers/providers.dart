@@ -8,10 +8,13 @@ import '../services/ai_recipe_generator.dart';
 import '../services/ai_service.dart';
 import '../services/favorites_service.dart';
 import '../services/gemini_service.dart';
+import '../services/local_ai_service.dart';
 import '../services/local_recipe_service.dart';
 import '../services/meal_service.dart';
 import '../services/openrouter_service.dart';
 import '../services/spoonacular_service.dart';
+import '../services/web_search_service.dart';
+import '../utils/api_key_service.dart';
 
 // ── Core ──────────────────────────────────────────────────────────
 final mealServiceProvider = Provider<MealService>((ref) => MealService());
@@ -30,14 +33,21 @@ final favoritesServiceProvider = Provider<FavoritesService>((ref) => FavoritesSe
 final geminiServiceProvider = Provider<GeminiService>((ref) => GeminiService());
 
 /// Factory inteligente: elige el proveedor más óptimo según dart-define.
-/// Prioridad: OPENROUTER_API_KEY (Muse Spark/Nemotron free) > GEMINI_PROXY_URL > GEMINI_API_KEY (Gemini)
+/// Prioridad: OPENROUTER_API_KEY (Muse Spark/Nemotron free) > GEMINI_PROXY_URL/GEMINI_API_KEY (Gemini) > Local (TheMealDB, 0€, sin key)
 final aiServiceProvider = Provider<AIService>((ref) {
   const openRouterKey = String.fromEnvironment('OPENROUTER_API_KEY');
   if (openRouterKey.isNotEmpty) {
     return OpenRouterService();
   }
-  // GeminiService ya maneja proxy internamente
-  return GeminiService();
+  if (GeminiService.proxyUrl.isNotEmpty) {
+    return GeminiService();
+  }
+  final geminiKey = ApiKeyService.getKey();
+  if (ApiKeyService.isValid(geminiKey)) {
+    return GeminiService();
+  }
+  // Fallback 100% free sin configuración: usa TheMealDB local
+  return LocalAIService(mealService: ref.read(mealServiceProvider));
 });
 
 // Alias para compatibilidad con código existente
@@ -73,6 +83,11 @@ final mealsByAreaProvider = FutureProvider.family<List<MealSummary>, String>((re
 
 final mealsByIngredientProvider = FutureProvider.family<List<MealSummary>, String>((ref, ing) {
   return ref.read(mealServiceProvider).getMealsByIngredient(ing);
+});
+
+final webSearchServiceProvider = Provider<WebSearchService>((ref) => WebSearchService());
+final webSearchProvider = FutureProvider.family<List<WebSearchResult>, String>((ref, dishName) {
+  return ref.read(webSearchServiceProvider).searchDish(dishName);
 });
 
 // ── Categorías ────────────────────────────────────────────────────

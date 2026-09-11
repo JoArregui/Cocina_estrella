@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Cocina Estrella - Local (sin API Key)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Cocina Estrella - OpenRouter Vision (Muse Spark FREE)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": [
+        "--dart-define=OPENROUTER_API_KEY=sk-or-PEGA_AQUI_TU_KEY",
+        "--dart-define=AI_PROVIDER=muse-spark"
+      ]
+    }
+  ]
+}
