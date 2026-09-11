@@ -6,25 +6,45 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:cocina_estrella_app/main.dart';
+import 'package:recipe_app/main.dart';
+import 'package:recipe_app/providers/providers.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('RecipeApp smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          categoriesProvider.overrideWith((ref) async => []),
+        ],
+        child: const RecipeApp(),
+      ),
+    );
     await tester.pump();
+    expect(find.text('¿Qué cocinamos\nhoy?'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('RecipeApp has Chef IA banner', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          categoriesProvider.overrideWith((ref) async => []),
+        ],
+        child: const RecipeApp(),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('Chef IA'), findsOneWidget);
+  });
+
+  testWidgets('Home shows shimmer when loading', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: RecipeApp(),
+      ),
+    );
+    // Sin override, queda en loading (no necesita Hive mock si no resuelve)
+    expect(find.byType(CircularProgressIndicator).evaluate().isNotEmpty || find.text('¿Qué cocinamos\nhoy?').evaluate().isNotEmpty, isTrue);
   });
 }

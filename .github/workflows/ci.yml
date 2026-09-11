@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  analyze-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Build APK (smoke)
+        run: flutter build apk --debug --dart-define=GEMINI_API_KEY=dummy_test_key
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check .env not in assets
+        run: |
+          if grep -q "\.env" pubspec.yaml; then
+            echo "ERROR: .env found in pubspec.yaml assets"; exit 1
+          fi
+          echo "Security check passed: .env not in assets"
+      - name: Check no hardcoded API key
+        run: |
+          if grep -r "AIza" lib/ --include="*.dart" | grep -v "ApiKeyService"; then
+            echo "WARNING: possible hardcoded API key in lib/"
+          fi
