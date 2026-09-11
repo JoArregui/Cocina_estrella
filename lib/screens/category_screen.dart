@@ -27,27 +27,110 @@ class CategoryScreen extends ConsumerWidget {
             backgroundColor: const Color(0xFFE8490F),
             iconTheme: const IconThemeData(color: Colors.white),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text(Translator.category(category.name), style: GoogleFonts.playfairDisplay(color: Colors.white, fontWeight: FontWeight.bold)),
-              background: Stack(fit: StackFit.expand, children: [
-                CachedNetworkImage(imageUrl: category.thumbnail, fit: BoxFit.cover),
-                Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withValues(alpha: 0.2), Colors.black.withValues(alpha: 0.65)]))),
-              ]),
+              title: Text(
+                Translator.category(category.name),
+                style: GoogleFonts.playfairDisplay(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: category.thumbnail,
+                    fit: BoxFit.cover,
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.2),
+                          Colors.black.withValues(alpha: 0.65),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           mealsAsync.when(
             loading: () => SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate((_, __) => Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))), childCount: 6),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 0.85),
+                delegate: SliverChildBuilderDelegate(
+                  (_, __) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
+                  childCount: 6,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.85,
+                ),
               ),
             ),
-            error: (e, _) => SliverToBoxAdapter(child: Center(child: Column(children: [const SizedBox(height: 40), const Icon(Icons.error_outline, size: 48, color: Colors.grey), const SizedBox(height: 12), Text(e.toString(), style: GoogleFonts.nunito(fontSize: 12, color: Colors.grey), textAlign: TextAlign.center), const SizedBox(height: 12), ElevatedButton(onPressed: () => ref.invalidate(mealsByCategoryProvider(category.name)), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE8490F)), child: const Text('Reintentar'))]))),
+            error: (e, _) => SliverToBoxAdapter(
+              child: Center(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      e.toString(),
+                      style: GoogleFonts.nunito(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () => ref.invalidate(
+                        mealsByCategoryProvider(category.name),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE8490F),
+                      ),
+                      child: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             data: (meals) => SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
               sliver: SliverGrid(
-                delegate: SliverChildBuilderDelegate((context, index) => MealCard(meal: meals[index], onTap: () => _openMeal(context, meals[index])), childCount: meals.length),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 14, mainAxisSpacing: 14, childAspectRatio: 0.85),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => MealCard(
+                    meal: meals[index],
+                    onTap: () => _openMeal(context, meals[index]),
+                  ),
+                  childCount: meals.length,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 0.85,
+                ),
               ),
             ),
           ),
@@ -57,6 +140,9 @@ class CategoryScreen extends ConsumerWidget {
   }
 
   void _openMeal(BuildContext context, MealSummary meal) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(mealId: meal.id)));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => RecipeDetailScreen(mealId: meal.id)),
+    );
   }
 }

@@ -56,10 +56,14 @@ class AppDatabase {
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          await db.execute('CREATE TABLE IF NOT EXISTS cached_categories(id TEXT PRIMARY KEY, json TEXT NOT NULL, updated_at INTEGER NOT NULL)');
+          await db.execute(
+            'CREATE TABLE IF NOT EXISTS cached_categories(id TEXT PRIMARY KEY, json TEXT NOT NULL, updated_at INTEGER NOT NULL)',
+          );
         }
         if (oldVersion < 3) {
-          await db.execute('CREATE TABLE IF NOT EXISTS user_recipes(id TEXT PRIMARY KEY, json TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)');
+          await db.execute(
+            'CREATE TABLE IF NOT EXISTS user_recipes(id TEXT PRIMARY KEY, json TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)',
+          );
         }
       },
     );
@@ -73,13 +77,22 @@ class AppDatabase {
 
   static Future<bool> isFavorite(String id) async {
     final db = await database;
-    final res = await db.query('favorites', where: 'id = ?', whereArgs: [id], limit: 1);
+    final res = await db.query(
+      'favorites',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     return res.isNotEmpty;
   }
 
   static Future<void> insertFavorite(Map<String, dynamic> row) async {
     final db = await database;
-    await db.insert('favorites', row, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      'favorites',
+      row,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> deleteFavorite(String id) async {
@@ -95,26 +108,44 @@ class AppDatabase {
   // ── Cache ────────────────────────────────────────────────────────
   static Future<String?> getCachedMeal(String id) async {
     final db = await database;
-    final res = await db.query('cached_meals', where: 'id = ?', whereArgs: [id], limit: 1);
+    final res = await db.query(
+      'cached_meals',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     if (res.isEmpty) return null;
     return res.first['json'] as String;
   }
 
   static Future<void> putCachedMeal(String id, String json) async {
     final db = await database;
-    await db.insert('cached_meals', {'id': id, 'json': json, 'updated_at': DateTime.now().millisecondsSinceEpoch}, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('cached_meals', {
+      'id': id,
+      'json': json,
+      'updated_at': DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<String?> getCachedCategories() async {
     final db = await database;
-    final res = await db.query('cached_categories', where: 'id = ?', whereArgs: ['categories'], limit: 1);
+    final res = await db.query(
+      'cached_categories',
+      where: 'id = ?',
+      whereArgs: ['categories'],
+      limit: 1,
+    );
     if (res.isEmpty) return null;
     return res.first['json'] as String;
   }
 
   static Future<void> putCachedCategories(String json) async {
     final db = await database;
-    await db.insert('cached_categories', {'id': 'categories', 'json': json, 'updated_at': DateTime.now().millisecondsSinceEpoch}, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('cached_categories', {
+      'id': 'categories',
+      'json': json,
+      'updated_at': DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // ── User Recipes ─────────────────────────────────────────────────
@@ -126,12 +157,22 @@ class AppDatabase {
   static Future<void> insertUserRecipe(String id, String json) async {
     final db = await database;
     final now = DateTime.now().millisecondsSinceEpoch;
-    await db.insert('user_recipes', {'id': id, 'json': json, 'created_at': now, 'updated_at': now}, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('user_recipes', {
+      'id': id,
+      'json': json,
+      'created_at': now,
+      'updated_at': now,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> updateUserRecipe(String id, String json) async {
     final db = await database;
-    await db.update('user_recipes', {'json': json, 'updated_at': DateTime.now().millisecondsSinceEpoch}, where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'user_recipes',
+      {'json': json, 'updated_at': DateTime.now().millisecondsSinceEpoch},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   static Future<void> deleteUserRecipe(String id) async {
@@ -141,7 +182,12 @@ class AppDatabase {
 
   static Future<Map<String, dynamic>?> getUserRecipe(String id) async {
     final db = await database;
-    final res = await db.query('user_recipes', where: 'id = ?', whereArgs: [id], limit: 1);
+    final res = await db.query(
+      'user_recipes',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     if (res.isEmpty) return null;
     return res.first;
   }

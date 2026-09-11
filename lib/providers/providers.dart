@@ -25,10 +25,15 @@ final cacheBoxProvider = Provider<Box<String>>((ref) {
 });
 
 final mealRepositoryProvider = Provider<MealRepository>((ref) {
-  return MealRepository(ref.read(mealServiceProvider), ref.read(cacheBoxProvider));
+  return MealRepository(
+    ref.read(mealServiceProvider),
+    ref.read(cacheBoxProvider),
+  );
 });
 
-final favoritesServiceProvider = Provider<FavoritesService>((ref) => FavoritesService());
+final favoritesServiceProvider = Provider<FavoritesService>(
+  (ref) => FavoritesService(),
+);
 
 final geminiServiceProvider = Provider<GeminiService>((ref) => GeminiService());
 
@@ -51,15 +56,29 @@ final aiServiceProvider = Provider<AIService>((ref) {
 });
 
 // Alias para compatibilidad con código existente
-final openRouterServiceProvider = Provider<OpenRouterService>((ref) => OpenRouterService());
+final openRouterServiceProvider = Provider<OpenRouterService>(
+  (ref) => OpenRouterService(),
+);
 
-final spoonacularServiceProvider = Provider<SpoonacularService>((ref) => SpoonacularService());
-final unifiedRecipeRepositoryProvider = Provider<UnifiedRecipeRepository>((ref) {
-  return UnifiedRecipeRepository(ref.read(mealRepositoryProvider), ref.read(mealServiceProvider), ref.read(spoonacularServiceProvider));
+final spoonacularServiceProvider = Provider<SpoonacularService>(
+  (ref) => SpoonacularService(),
+);
+final unifiedRecipeRepositoryProvider = Provider<UnifiedRecipeRepository>((
+  ref,
+) {
+  return UnifiedRecipeRepository(
+    ref.read(mealRepositoryProvider),
+    ref.read(mealServiceProvider),
+    ref.read(spoonacularServiceProvider),
+  );
 });
 
-final localRecipeServiceProvider = Provider<LocalRecipeService>((ref) => LocalRecipeService());
-final aiRecipeGeneratorProvider = Provider<AiRecipeGenerator>((ref) => AiRecipeGenerator());
+final localRecipeServiceProvider = Provider<LocalRecipeService>(
+  (ref) => LocalRecipeService(),
+);
+final aiRecipeGeneratorProvider = Provider<AiRecipeGenerator>(
+  (ref) => AiRecipeGenerator(),
+);
 
 final userRecipesProvider = FutureProvider<List<Meal>>((ref) async {
   return ref.read(localRecipeServiceProvider).getAll();
@@ -77,16 +96,25 @@ final ingredientsProvider = FutureProvider<List<String>>((ref) {
   return ref.read(mealServiceProvider).getIngredientList();
 });
 
-final mealsByAreaProvider = FutureProvider.family<List<MealSummary>, String>((ref, area) {
+final mealsByAreaProvider = FutureProvider.family<List<MealSummary>, String>((
+  ref,
+  area,
+) {
   return ref.read(mealServiceProvider).getMealsByArea(area);
 });
 
-final mealsByIngredientProvider = FutureProvider.family<List<MealSummary>, String>((ref, ing) {
-  return ref.read(mealServiceProvider).getMealsByIngredient(ing);
-});
+final mealsByIngredientProvider =
+    FutureProvider.family<List<MealSummary>, String>((ref, ing) {
+      return ref.read(mealServiceProvider).getMealsByIngredient(ing);
+    });
 
-final webSearchServiceProvider = Provider<WebSearchService>((ref) => WebSearchService());
-final webSearchProvider = FutureProvider.family<List<WebSearchResult>, String>((ref, dishName) {
+final webSearchServiceProvider = Provider<WebSearchService>(
+  (ref) => WebSearchService(),
+);
+final webSearchProvider = FutureProvider.family<List<WebSearchResult>, String>((
+  ref,
+  dishName,
+) {
   return ref.read(webSearchServiceProvider).searchDish(dishName);
 });
 
@@ -96,9 +124,10 @@ final categoriesProvider = FutureProvider<List<MealCategory>>((ref) {
 });
 
 // ── Platos por categoría ──────────────────────────────────────────
-final mealsByCategoryProvider = FutureProvider.family<List<MealSummary>, String>((ref, category) {
-  return ref.read(mealRepositoryProvider).getMealsByCategory(category);
-});
+final mealsByCategoryProvider =
+    FutureProvider.family<List<MealSummary>, String>((ref, category) {
+      return ref.read(mealRepositoryProvider).getMealsByCategory(category);
+    });
 
 // ── Detalle ───────────────────────────────────────────────────────
 final mealDetailProvider = FutureProvider.family<Meal, String>((ref, id) {
@@ -119,10 +148,11 @@ final searchResultsProvider = FutureProvider<List<MealSummary>>((ref) async {
 });
 
 // ── Favoritos ─────────────────────────────────────────────────────
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, List<String>>((ref) {
-  final svc = ref.read(favoritesServiceProvider);
-  return FavoritesNotifier(svc);
-});
+final favoritesProvider =
+    StateNotifierProvider<FavoritesNotifier, List<String>>((ref) {
+      final svc = ref.read(favoritesServiceProvider);
+      return FavoritesNotifier(svc);
+    });
 
 class FavoritesNotifier extends StateNotifier<List<String>> {
   final FavoritesService _svc;
@@ -159,16 +189,21 @@ class ChefIaState {
     List<RecipeSuggestion>? suggestions,
     List<MealSummary>? matchedMeals,
   }) => ChefIaState(
-        analyzing: analyzing ?? this.analyzing,
-        error: error,
-        ingredients: ingredients ?? this.ingredients,
-        suggestions: suggestions ?? this.suggestions,
-        matchedMeals: matchedMeals ?? this.matchedMeals,
-      );
+    analyzing: analyzing ?? this.analyzing,
+    error: error,
+    ingredients: ingredients ?? this.ingredients,
+    suggestions: suggestions ?? this.suggestions,
+    matchedMeals: matchedMeals ?? this.matchedMeals,
+  );
 }
 
-final chefIaProvider = StateNotifierProvider<ChefIaNotifier, ChefIaState>((ref) {
-  return ChefIaNotifier(ref.read(aiServiceProvider), ref.read(mealRepositoryProvider));
+final chefIaProvider = StateNotifierProvider<ChefIaNotifier, ChefIaState>((
+  ref,
+) {
+  return ChefIaNotifier(
+    ref.read(aiServiceProvider),
+    ref.read(mealRepositoryProvider),
+  );
 });
 
 class ChefIaNotifier extends StateNotifier<ChefIaState> {
@@ -180,10 +215,18 @@ class ChefIaNotifier extends StateNotifier<ChefIaState> {
     state = state.copyWith(analyzing: true, error: null);
     try {
       final result = await _ai.analyze(textIngredients: text);
-      state = state.copyWith(analyzing: false, ingredients: result.ingredients, suggestions: result.suggestions, matchedMeals: []);
+      state = state.copyWith(
+        analyzing: false,
+        ingredients: result.ingredients,
+        suggestions: result.suggestions,
+        matchedMeals: [],
+      );
       await _fetchPhotos(result.suggestions);
     } catch (e) {
-      state = state.copyWith(analyzing: false, error: e.toString().replaceFirst('Exception: ', ''));
+      state = state.copyWith(
+        analyzing: false,
+        error: e.toString().replaceFirst('Exception: ', ''),
+      );
     }
   }
 
@@ -191,10 +234,18 @@ class ChefIaNotifier extends StateNotifier<ChefIaState> {
     state = state.copyWith(analyzing: true, error: null);
     try {
       final result = await _ai.analyze(image: file.file);
-      state = state.copyWith(analyzing: false, ingredients: result.ingredients, suggestions: result.suggestions, matchedMeals: []);
+      state = state.copyWith(
+        analyzing: false,
+        ingredients: result.ingredients,
+        suggestions: result.suggestions,
+        matchedMeals: [],
+      );
       await _fetchPhotos(result.suggestions);
     } catch (e) {
-      state = state.copyWith(analyzing: false, error: e.toString().replaceFirst('Exception: ', ''));
+      state = state.copyWith(
+        analyzing: false,
+        error: e.toString().replaceFirst('Exception: ', ''),
+      );
     }
   }
 
@@ -203,9 +254,16 @@ class ChefIaNotifier extends StateNotifier<ChefIaState> {
     for (final s in suggestions) {
       try {
         final r = await _repo.searchMeals(s.name);
-        if (r.isNotEmpty) { meals.add(r.first); continue; }
+        if (r.isNotEmpty) {
+          meals.add(r.first);
+          continue;
+        }
         final r2 = await _repo.searchMeals(s.nameEs);
-        meals.add(r2.isNotEmpty ? r2.first : MealSummary(id: '', name: s.nameEs, thumbnail: ''));
+        meals.add(
+          r2.isNotEmpty
+              ? r2.first
+              : MealSummary(id: '', name: s.nameEs, thumbnail: ''),
+        );
       } catch (_) {
         meals.add(MealSummary(id: '', name: s.nameEs, thumbnail: ''));
       }

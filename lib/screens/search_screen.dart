@@ -56,27 +56,89 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             hintStyle: GoogleFonts.nunito(color: const Color(0xFFAAAAAA)),
             border: InputBorder.none,
             suffixIcon: _controller.text.isNotEmpty
-                ? IconButton(icon: const Icon(Icons.clear, color: Color(0xFFAAAAAA)), onPressed: () { _controller.clear(); ref.read(searchQueryProvider.notifier).state = ''; setState(() {}); })
+                ? IconButton(
+                    icon: const Icon(Icons.clear, color: Color(0xFFAAAAAA)),
+                    onPressed: () {
+                      _controller.clear();
+                      ref.read(searchQueryProvider.notifier).state = '';
+                      setState(() {});
+                    },
+                  )
                 : null,
           ),
         ),
       ),
       body: query.isEmpty
           ? Center(
-              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(Icons.search, size: 64, color: Colors.grey[300]),
-                const SizedBox(height: 16),
-                Text('Busca tu receta favorita', style: GoogleFonts.playfairDisplay(fontSize: 20, color: const Color(0xFF888888))),
-                const SizedBox(height: 8),
-                Text('Por ejemplo: pasta, pollo, sushi...', style: GoogleFonts.nunito(fontSize: 14, color: const Color(0xFFAAAAAA))),
-              ]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search, size: 64, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Busca tu receta favorita',
+                    style: GoogleFonts.playfairDisplay(
+                      fontSize: 20,
+                      color: const Color(0xFF888888),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Por ejemplo: pasta, pollo, sushi...',
+                    style: GoogleFonts.nunito(
+                      fontSize: 14,
+                      color: const Color(0xFFAAAAAA),
+                    ),
+                  ),
+                ],
+              ),
             )
           : resultsAsync.when(
-              loading: () => ListView.builder(padding: const EdgeInsets.all(16), itemCount: 5, itemBuilder: (_, __) => Shimmer.fromColors(baseColor: Colors.grey[300]!, highlightColor: Colors.grey[100]!, child: Container(margin: const EdgeInsets.only(bottom: 12), height: 80, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14))))),
-              error: (e, _) => Center(child: Text(e.toString(), style: GoogleFonts.nunito())),
+              loading: () => ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: 5,
+                itemBuilder: (_, __) => Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+              error: (e, _) => Center(
+                child: Text(e.toString(), style: GoogleFonts.nunito()),
+              ),
               data: (results) {
                 if (results.isEmpty) {
-                  return Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.no_meals, size: 64, color: Colors.grey[300]), const SizedBox(height: 16), Text('Sin resultados', style: GoogleFonts.playfairDisplay(fontSize: 20, color: const Color(0xFF888888))), const SizedBox(height: 8), Text('Prueba con otra palabra clave', style: GoogleFonts.nunito(fontSize: 14, color: const Color(0xFFAAAAAA)))]));
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.no_meals, size: 64, color: Colors.grey[300]),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Sin resultados',
+                          style: GoogleFonts.playfairDisplay(
+                            fontSize: 20,
+                            color: const Color(0xFF888888),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Prueba con otra palabra clave',
+                          style: GoogleFonts.nunito(
+                            fontSize: 14,
+                            color: const Color(0xFFAAAAAA),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
@@ -84,8 +146,68 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   itemBuilder: (context, index) {
                     final meal = results[index];
                     return GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(mealId: meal.id))),
-                      child: Container(margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 3))]), child: Row(children: [ClipRRect(borderRadius: const BorderRadius.horizontal(left: Radius.circular(14)), child: CachedNetworkImage(imageUrl: '${meal.thumbnail}/small', width: 80, height: 80, fit: BoxFit.cover, errorWidget: (_, __, ___) => CachedNetworkImage(imageUrl: meal.thumbnail, width: 80, height: 80, fit: BoxFit.cover))), const SizedBox(width: 14), Expanded(child: Text(meal.name, style: GoogleFonts.nunito(fontSize: 15, fontWeight: FontWeight.w700, color: const Color(0xFF1A1A1A)), maxLines: 2, overflow: TextOverflow.ellipsis)), const Padding(padding: EdgeInsets.only(right: 12), child: Icon(Icons.arrow_forward_ios, size: 14, color: Color(0xFFCCCCCC)))])),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RecipeDetailScreen(mealId: meal.id),
+                        ),
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.horizontal(
+                                left: Radius.circular(14),
+                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: '${meal.thumbnail}/small',
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, __, ___) => CachedNetworkImage(
+                                  imageUrl: meal.thumbnail,
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                meal.name,
+                                style: GoogleFonts.nunito(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A1A),
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(right: 12),
+                              child: Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Color(0xFFCCCCCC),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     );
                   },
                 );

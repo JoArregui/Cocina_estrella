@@ -18,39 +18,58 @@ class MealRepository {
       try {
         final raw = _cacheBox.get(_keyCategories)!;
         final List decoded = jsonDecode(raw) as List;
-        return decoded.map((e) => MealCategory.fromJson(e as Map<String, dynamic>)).toList();
+        return decoded
+            .map((e) => MealCategory.fromJson(e as Map<String, dynamic>))
+            .toList();
       } catch (_) {
         // cache corrupt -> fetch fresh
       }
     }
     final categories = await _service.getCategories();
     try {
-      final encoded = jsonEncode(categories.map((c) => {
-            'strCategory': c.name,
-            'strCategoryThumb': c.thumbnail,
-            'strCategoryDescription': c.description,
-          }).toList());
+      final encoded = jsonEncode(
+        categories
+            .map(
+              (c) => {
+                'strCategory': c.name,
+                'strCategoryThumb': c.thumbnail,
+                'strCategoryDescription': c.description,
+              },
+            )
+            .toList(),
+      );
       await _cacheBox.put(_keyCategories, encoded);
     } catch (_) {}
     return categories;
   }
 
-  Future<List<MealSummary>> getMealsByCategory(String category, {bool forceRefresh = false}) async {
+  Future<List<MealSummary>> getMealsByCategory(
+    String category, {
+    bool forceRefresh = false,
+  }) async {
     final key = '$_keyCategoryPrefix$category';
     if (!forceRefresh && _cacheBox.containsKey(key)) {
       try {
         final raw = _cacheBox.get(key)!;
         final List decoded = jsonDecode(raw) as List;
-        return decoded.map((e) => MealSummary.fromJson(e as Map<String, dynamic>)).toList();
+        return decoded
+            .map((e) => MealSummary.fromJson(e as Map<String, dynamic>))
+            .toList();
       } catch (_) {}
     }
     final meals = await _service.getMealsByCategory(category);
     try {
-      final encoded = jsonEncode(meals.map((m) => {
-            'idMeal': m.id,
-            'strMeal': m.name,
-            'strMealThumb': m.thumbnail,
-          }).toList());
+      final encoded = jsonEncode(
+        meals
+            .map(
+              (m) => {
+                'idMeal': m.id,
+                'strMeal': m.name,
+                'strMealThumb': m.thumbnail,
+              },
+            )
+            .toList(),
+      );
       await _cacheBox.put(key, encoded);
     } catch (_) {}
     return meals;
@@ -87,7 +106,7 @@ class MealRepository {
         for (int i = 0; i < meal.ingredients.length; i++) ...{
           'strIngredient${i + 1}': meal.ingredients[i].name,
           'strMeasure${i + 1}': meal.ingredients[i].measure,
-        }
+        },
       });
       await _cacheBox.put(key, encoded);
     } catch (_) {}

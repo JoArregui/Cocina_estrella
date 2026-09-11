@@ -90,8 +90,9 @@ class MealService {
 
         // Traducimos textos principales en paralelo
         final translatedNameFuture = Translator.translate(meal.name);
-        final translatedInstructionsFuture =
-            Translator.translate(meal.instructions);
+        final translatedInstructionsFuture = Translator.translate(
+          meal.instructions,
+        );
 
         final translatedIngredients = await Future.wait(
           meal.ingredients.map((ing) async {
@@ -134,7 +135,9 @@ class MealService {
 
   // Buscar platos por área
   Future<List<MealSummary>> getMealsByArea(String area) async {
-    final response = await _get(Uri.parse('$_baseUrl/filter.php?a=${Uri.encodeComponent(area)}'));
+    final response = await _get(
+      Uri.parse('$_baseUrl/filter.php?a=${Uri.encodeComponent(area)}'),
+    );
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.body);
@@ -144,12 +147,16 @@ class MealService {
         throw Exception('Respuesta inválida del servidor');
       }
     }
-    throw Exception('Error al cargar platos por área (HTTP ${response.statusCode})');
+    throw Exception(
+      'Error al cargar platos por área (HTTP ${response.statusCode})',
+    );
   }
 
   // Buscar platos por ingrediente principal
   Future<List<MealSummary>> getMealsByIngredient(String ingredient) async {
-    final response = await _get(Uri.parse('$_baseUrl/filter.php?i=${Uri.encodeComponent(ingredient)}'));
+    final response = await _get(
+      Uri.parse('$_baseUrl/filter.php?i=${Uri.encodeComponent(ingredient)}'),
+    );
     if (response.statusCode == 200) {
       try {
         final data = json.decode(response.body);
@@ -159,7 +166,9 @@ class MealService {
         throw Exception('Respuesta inválida del servidor');
       }
     }
-    throw Exception('Error al cargar platos por ingrediente (HTTP ${response.statusCode})');
+    throw Exception(
+      'Error al cargar platos por ingrediente (HTTP ${response.statusCode})',
+    );
   }
 
   // Obtener lista de ingredientes con imagen
@@ -174,7 +183,9 @@ class MealService {
         throw Exception('Respuesta inválida del servidor');
       }
     }
-    throw Exception('Error al cargar ingredientes (HTTP ${response.statusCode})');
+    throw Exception(
+      'Error al cargar ingredientes (HTTP ${response.statusCode})',
+    );
   }
 
   // Obtener un plato aleatorio
@@ -188,14 +199,25 @@ class MealService {
         final meal = Meal.fromJson(meals.first);
         final tName = await Translator.translate(meal.name);
         final tInstr = await Translator.translate(meal.instructions);
-        final tIngs = await Future.wait(meal.ingredients.map((ing) async => ing.copyWith(name: await Translator.translate(ing.name))));
-        return meal.copyWith(name: tName, instructions: tInstr, ingredients: tIngs);
+        final tIngs = await Future.wait(
+          meal.ingredients.map(
+            (ing) async =>
+                ing.copyWith(name: await Translator.translate(ing.name)),
+          ),
+        );
+        return meal.copyWith(
+          name: tName,
+          instructions: tInstr,
+          ingredients: tIngs,
+        );
       } catch (e) {
         if (e.toString().contains('No se encontró')) rethrow;
         throw Exception('Respuesta inválida del servidor');
       }
     }
-    throw Exception('Error al cargar receta aleatoria (HTTP ${response.statusCode})');
+    throw Exception(
+      'Error al cargar receta aleatoria (HTTP ${response.statusCode})',
+    );
   }
 
   void dispose() => _client.close();

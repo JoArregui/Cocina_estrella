@@ -15,7 +15,8 @@ class SpoonacularService {
 
   SpoonacularService({http.Client? client}) : _client = client ?? http.Client();
 
-  static String get apiKey => const String.fromEnvironment('SPOONACULAR_API_KEY');
+  static String get apiKey =>
+      const String.fromEnvironment('SPOONACULAR_API_KEY');
   static bool get isConfigured => apiKey.isNotEmpty;
 
   Future<http.Response> _get(Uri uri) async {
@@ -30,18 +31,26 @@ class SpoonacularService {
 
   Future<List<MealSummary>> search(String query) async {
     if (!isConfigured) return [];
-    final uri = Uri.parse('$_baseUrl/recipes/complexSearch?query=${Uri.encodeComponent(query)}&number=10&apiKey=$apiKey');
+    final uri = Uri.parse(
+      '$_baseUrl/recipes/complexSearch?query=${Uri.encodeComponent(query)}&number=10&apiKey=$apiKey',
+    );
     final res = await _get(uri);
-    if (res.statusCode == 402) throw Exception('Límite Spoonacular alcanzado (402)');
-    if (res.statusCode != 200) throw Exception('Spoonacular HTTP ${res.statusCode}');
+    if (res.statusCode == 402)
+      throw Exception('Límite Spoonacular alcanzado (402)');
+    if (res.statusCode != 200)
+      throw Exception('Spoonacular HTTP ${res.statusCode}');
     try {
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final results = (data['results'] as List?) ?? [];
-      return results.map((r) => MealSummary(
-            id: 'sp_${r['id']}',
-            name: r['title'] ?? '',
-            thumbnail: r['image'] ?? '',
-          )).toList();
+      return results
+          .map(
+            (r) => MealSummary(
+              id: 'sp_${r['id']}',
+              name: r['title'] ?? '',
+              thumbnail: r['image'] ?? '',
+            ),
+          )
+          .toList();
     } catch (_) {
       throw Exception('Respuesta Spoonacular inválida');
     }
@@ -50,24 +59,34 @@ class SpoonacularService {
   Future<Meal?> getById(String id) async {
     if (!isConfigured) return null;
     final spoonId = id.replaceFirst('sp_', '');
-    final uri = Uri.parse('$_baseUrl/recipes/$spoonId/information?apiKey=$apiKey&includeNutrition=false');
+    final uri = Uri.parse(
+      '$_baseUrl/recipes/$spoonId/information?apiKey=$apiKey&includeNutrition=false',
+    );
     final res = await _get(uri);
     if (res.statusCode != 200) return null;
     try {
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final ingredients = <MealIngredient>[];
       for (final ing in (data['extendedIngredients'] as List? ?? [])) {
-        ingredients.add(MealIngredient(
-          name: ing['name']?.toString() ?? '',
-          measure: '${ing['amount'] ?? ''} ${ing['unit'] ?? ''}'.trim(),
-        ));
+        ingredients.add(
+          MealIngredient(
+            name: ing['name']?.toString() ?? '',
+            measure: '${ing['amount'] ?? ''} ${ing['unit'] ?? ''}'.trim(),
+          ),
+        );
       }
       return Meal(
         id: 'sp_${data['id']}',
         name: data['title'] ?? '',
-        category: (data['dishTypes'] as List?)?.firstOrNull?.toString() ?? 'Varios',
-        area: (data['cuisines'] as List?)?.firstOrNull?.toString() ?? 'Internacional',
-        instructions: (data['instructions'] ?? '').toString().replaceAll(RegExp(r'<[^>]*>'), ''),
+        category:
+            (data['dishTypes'] as List?)?.firstOrNull?.toString() ?? 'Varios',
+        area:
+            (data['cuisines'] as List?)?.firstOrNull?.toString() ??
+            'Internacional',
+        instructions: (data['instructions'] ?? '').toString().replaceAll(
+          RegExp(r'<[^>]*>'),
+          '',
+        ),
         thumbnail: data['image'] ?? '',
         youtubeUrl: data['sourceUrl']?.toString(),
         ingredients: ingredients,

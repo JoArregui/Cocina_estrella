@@ -12,18 +12,23 @@ int? detectTimerSeconds(String text) {
     RegExp(r'(\d+)\s*segundo[s]?'),
   ];
   int total = 0;
-  final hourMatch = patterns[0].firstMatch(lower) ?? patterns[1].firstMatch(lower);
+  final hourMatch =
+      patterns[0].firstMatch(lower) ?? patterns[1].firstMatch(lower);
   if (hourMatch != null) total += int.parse(hourMatch.group(1)!) * 3600;
-  final minMatch = patterns[2].firstMatch(lower) ?? patterns[3].firstMatch(lower);
+  final minMatch =
+      patterns[2].firstMatch(lower) ?? patterns[3].firstMatch(lower);
   if (minMatch != null) total += int.parse(minMatch.group(1)!) * 60;
-  final secMatch = patterns[4].firstMatch(lower) ?? patterns[5].firstMatch(lower);
+  final secMatch =
+      patterns[4].firstMatch(lower) ?? patterns[5].firstMatch(lower);
   if (secMatch != null) total += int.parse(secMatch.group(1)!);
   final horaMatch = patterns[6].firstMatch(lower);
   if (horaMatch != null) total += int.parse(horaMatch.group(1)!) * 3600;
   final minutoMatch = patterns[7].firstMatch(lower);
-  if (minutoMatch != null && minMatch == null) total += int.parse(minutoMatch.group(1)!) * 60;
+  if (minutoMatch != null && minMatch == null)
+    total += int.parse(minutoMatch.group(1)!) * 60;
   final segundoMatch = patterns[8].firstMatch(lower);
-  if (segundoMatch != null && secMatch == null) total += int.parse(segundoMatch.group(1)!);
+  if (segundoMatch != null && secMatch == null)
+    total += int.parse(segundoMatch.group(1)!);
   return total > 0 ? total : null;
 }
 

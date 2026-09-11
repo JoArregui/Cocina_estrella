@@ -46,12 +46,13 @@ class Meal {
     for (int i = 1; i <= 20; i++) {
       final ingredient = json['strIngredient$i'];
       final measure = json['strMeasure$i'];
-      if (ingredient != null &&
-          ingredient.toString().trim().isNotEmpty) {
-        ingredients.add(MealIngredient(
-          name: ingredient.toString().trim(),
-          measure: (measure ?? '').toString().trim(),
-        ));
+      if (ingredient != null && ingredient.toString().trim().isNotEmpty) {
+        ingredients.add(
+          MealIngredient(
+            name: ingredient.toString().trim(),
+            measure: (measure ?? '').toString().trim(),
+          ),
+        );
       }
     }
 
@@ -89,11 +90,7 @@ class MealSummary {
   final String name;
   final String thumbnail;
 
-  MealSummary({
-    required this.id,
-    required this.name,
-    required this.thumbnail,
-  });
+  MealSummary({required this.id, required this.name, required this.thumbnail});
 
   factory MealSummary.fromJson(Map<String, dynamic> json) {
     return MealSummary(

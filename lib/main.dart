@@ -15,7 +15,9 @@ Future<void> main() async {
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {
-      debugPrint("Info: .env no cargado (usando --dart-define si está definido): $e");
+      debugPrint(
+        "Info: .env no cargado (usando --dart-define si está definido): $e",
+      );
     }
   }
 
@@ -23,10 +25,12 @@ Future<void> main() async {
   await Hive.openBox<String>('cache');
   await Hive.openBox<String>('favorites');
 
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-  ));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   runApp(const ProviderScope(child: RecipeApp()));
 }

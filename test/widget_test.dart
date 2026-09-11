@@ -15,9 +15,7 @@ void main() {
   testWidgets('RecipeApp smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          categoriesProvider.overrideWith((ref) async => []),
-        ],
+        overrides: [categoriesProvider.overrideWith((ref) async => [])],
         child: const RecipeApp(),
       ),
     );
@@ -28,9 +26,7 @@ void main() {
   testWidgets('RecipeApp has Chef IA banner', (WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          categoriesProvider.overrideWith((ref) async => []),
-        ],
+        overrides: [categoriesProvider.overrideWith((ref) async => [])],
         child: const RecipeApp(),
       ),
     );
@@ -39,12 +35,12 @@ void main() {
   });
 
   testWidgets('Home shows shimmer when loading', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: RecipeApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: RecipeApp()));
     // Sin override, queda en loading (no necesita Hive mock si no resuelve)
-    expect(find.byType(CircularProgressIndicator).evaluate().isNotEmpty || find.text('¿Qué cocinamos\nhoy?').evaluate().isNotEmpty, isTrue);
+    expect(
+      find.byType(CircularProgressIndicator).evaluate().isNotEmpty ||
+          find.text('¿Qué cocinamos\nhoy?').evaluate().isNotEmpty,
+      isTrue,
+    );
   });
 }

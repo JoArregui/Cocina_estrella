@@ -76,13 +76,16 @@ class FavoritesService {
           await _box.delete('meal_${meal.id}');
         } else {
           current.add(meal.id);
-          await _box.put('meal_${meal.id}', jsonEncode({
-            'idMeal': meal.id,
-            'strMeal': meal.name,
-            'strMealThumb': meal.thumbnail,
-            'strCategory': meal.category,
-            'strArea': meal.area,
-          }));
+          await _box.put(
+            'meal_${meal.id}',
+            jsonEncode({
+              'idMeal': meal.id,
+              'strMeal': meal.name,
+              'strMealThumb': meal.thumbnail,
+              'strCategory': meal.category,
+              'strArea': meal.area,
+            }),
+          );
         }
         await _saveIds(current);
         return;
@@ -96,13 +99,16 @@ class FavoritesService {
       await _box.delete('meal_${meal.id}');
     } else {
       current.add(meal.id);
-      await _box.put('meal_${meal.id}', jsonEncode({
-        'idMeal': meal.id,
-        'strMeal': meal.name,
-        'strMealThumb': meal.thumbnail,
-        'strCategory': meal.category,
-        'strArea': meal.area,
-      }));
+      await _box.put(
+        'meal_${meal.id}',
+        jsonEncode({
+          'idMeal': meal.id,
+          'strMeal': meal.name,
+          'strMealThumb': meal.thumbnail,
+          'strCategory': meal.category,
+          'strArea': meal.area,
+        }),
+      );
     }
     await _saveIds(current);
   }

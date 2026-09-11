@@ -12,10 +12,7 @@ class _CookStep {
   final int? timerSeconds; // null = no hay timer
   bool checked;
 
-  _CookStep({
-    required this.text,
-    this.timerSeconds,
-  }) : checked = false;
+  _CookStep({required this.text, this.timerSeconds}) : checked = false;
 }
 
 // ─── Pantalla principal ────────────────────────────────────────────
@@ -23,11 +20,7 @@ class CookingModeScreen extends StatefulWidget {
   final Meal meal;
   final List<String> steps;
 
-  const CookingModeScreen({
-    super.key,
-    required this.meal,
-    required this.steps,
-  });
+  const CookingModeScreen({super.key, required this.meal, required this.steps});
 
   @override
   State<CookingModeScreen> createState() => _CookingModeScreenState();
@@ -108,7 +101,10 @@ class _CookingModeScreenState extends State<CookingModeScreen>
     setState(() => _timerRunning[stepIndex] = true);
 
     _timers[stepIndex] = Timer.periodic(const Duration(seconds: 1), (t) {
-      if (!mounted) { t.cancel(); return; }
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
       setState(() {
         final r = _remaining[stepIndex]! - 1;
         if (r <= 0) {
@@ -149,7 +145,9 @@ class _CookingModeScreenState extends State<CookingModeScreen>
             Text(
               '¡Tiempo completado! Paso ${stepIndex + 1}',
               style: GoogleFonts.nunito(
-                  color: Colors.white, fontWeight: FontWeight.w700),
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -179,8 +177,8 @@ class _CookingModeScreenState extends State<CookingModeScreen>
             child: _finished
                 ? _buildFinishedScreen()
                 : _phase == 0
-                    ? _buildIngredientsPhase()
-                    : _buildStepsPhase(),
+                ? _buildIngredientsPhase()
+                : _buildStepsPhase(),
           ),
           if (!_finished) _buildBottomBar(),
         ],
@@ -229,7 +227,9 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 5),
+                          horizontal: 12,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE8490F),
                           borderRadius: BorderRadius.circular(20),
@@ -237,15 +237,19 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.menu_book,
-                                color: Colors.white, size: 14),
+                            const Icon(
+                              Icons.menu_book,
+                              color: Colors.white,
+                              size: 14,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               'Modo Cocinero',
                               style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700),
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ],
                         ),
@@ -350,8 +354,11 @@ class _CookingModeScreenState extends State<CookingModeScreen>
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
           child: Row(
             children: [
-              const Icon(Icons.shopping_basket,
-                  color: Color(0xFFE8490F), size: 22),
+              const Icon(
+                Icons.shopping_basket,
+                color: Color(0xFFE8490F),
+                size: 22,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Comprueba que tienes todo',
@@ -369,7 +376,9 @@ class _CookingModeScreenState extends State<CookingModeScreen>
           child: Text(
             'Marca cada ingrediente antes de empezar a cocinar.',
             style: GoogleFonts.nunito(
-                fontSize: 13, color: const Color(0xFF888888)),
+              fontSize: 13,
+              color: const Color(0xFF888888),
+            ),
           ),
         ),
         Expanded(
@@ -388,7 +397,9 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                     : Colors.white,
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 4),
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   leading: GestureDetector(
                     onTap: () => setState(() => _ingChecked[i] = !checked),
                     child: AnimatedContainer(
@@ -396,9 +407,7 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: checked
-                            ? Colors.green
-                            : Colors.transparent,
+                        color: checked ? Colors.green : Colors.transparent,
                         border: Border.all(
                           color: checked
                               ? Colors.green
@@ -408,8 +417,11 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: checked
-                          ? const Icon(Icons.check,
-                              color: Colors.white, size: 16)
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.white,
+                              size: 16,
+                            )
                           : null,
                     ),
                   ),
@@ -421,19 +433,21 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                       color: checked
                           ? const Color(0xFF888888)
                           : const Color(0xFF1A1A1A),
-                      decoration: checked
-                          ? TextDecoration.lineThrough
-                          : null,
+                      decoration: checked ? TextDecoration.lineThrough : null,
                     ),
                   ),
                   trailing: ing.measure.isNotEmpty
                       ? Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: checked
                                 ? Colors.green.withValues(alpha: 0.1)
-                                : const Color(0xFFE8490F).withValues(alpha: 0.1),
+                                : const Color(
+                                    0xFFE8490F,
+                                  ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -448,8 +462,7 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                           ),
                         )
                       : null,
-                  onTap: () =>
-                      setState(() => _ingChecked[i] = !checked),
+                  onTap: () => setState(() => _ingChecked[i] = !checked),
                 ),
               );
             },
@@ -479,15 +492,15 @@ class _CookingModeScreenState extends State<CookingModeScreen>
               color: isDone
                   ? Colors.green.withValues(alpha: 0.06)
                   : isActive
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.6),
+                  ? Colors.white
+                  : Colors.white.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDone
                     ? Colors.green.withValues(alpha: 0.3)
                     : isActive
-                        ? const Color(0xFFE8490F)
-                        : Colors.transparent,
+                    ? const Color(0xFFE8490F)
+                    : Colors.transparent,
                 width: isActive ? 2 : 1,
               ),
               boxShadow: isActive
@@ -496,14 +509,14 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                         color: const Color(0xFFE8490F).withValues(alpha: 0.12),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
-                      )
+                      ),
                     ]
                   : [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
-                      )
+                      ),
                     ],
             ),
             child: Padding(
@@ -515,7 +528,10 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                   Row(
                     children: [
                       _StepBubble(
-                          number: i + 1, isDone: isDone, isActive: isActive),
+                        number: i + 1,
+                        isDone: isDone,
+                        isActive: isActive,
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -526,14 +542,17 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                             color: isDone
                                 ? Colors.green
                                 : isActive
-                                    ? const Color(0xFFE8490F)
-                                    : const Color(0xFFAAAAAA),
+                                ? const Color(0xFFE8490F)
+                                : const Color(0xFFAAAAAA),
                           ),
                         ),
                       ),
                       if (isLocked)
-                        const Icon(Icons.lock_outline,
-                            size: 16, color: Color(0xFFCCCCCC)),
+                        const Icon(
+                          Icons.lock_outline,
+                          size: 16,
+                          color: Color(0xFFCCCCCC),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -549,8 +568,7 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                     ),
                   ),
                   // Timer (si aplica y está activo o hecho)
-                  if (step.timerSeconds != null &&
-                      (isActive || isDone)) ...[
+                  if (step.timerSeconds != null && (isActive || isDone)) ...[
                     const SizedBox(height: 14),
                     _buildTimer(i, step),
                   ],
@@ -569,8 +587,7 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                           });
                           _checkAllDone();
                         },
-                        icon: const Icon(Icons.check_circle_outline,
-                            size: 18),
+                        icon: const Icon(Icons.check_circle_outline, size: 18),
                         label: Text(
                           '✓  Paso completado',
                           style: GoogleFonts.nunito(
@@ -581,10 +598,10 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE8490F),
                           foregroundColor: Colors.white,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 13),
+                          padding: const EdgeInsets.symmetric(vertical: 13),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           elevation: 0,
                         ),
                       ),
@@ -595,8 +612,11 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        const Icon(Icons.check_circle,
-                            color: Colors.green, size: 16),
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 16,
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           'Completado',
@@ -772,14 +792,17 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                   label: Text(
                     'Volver al inicio',
                     style: GoogleFonts.nunito(
-                        fontSize: 16, fontWeight: FontWeight.w700),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFE8490F),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     elevation: 0,
                   ),
                 ),
@@ -816,8 +839,11 @@ class _CookingModeScreenState extends State<CookingModeScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.info_outline,
-                        size: 14, color: Color(0xFFAAAAAA)),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: Color(0xFFAAAAAA),
+                    ),
                     const SizedBox(width: 5),
                     Text(
                       'Marca todos los ingredientes para continuar',
@@ -832,24 +858,26 @@ class _CookingModeScreenState extends State<CookingModeScreen>
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: allChecked
-                    ? () => setState(() => _phase = 1)
-                    : null,
+                onPressed: allChecked ? () => setState(() => _phase = 1) : null,
                 icon: const Icon(Icons.arrow_forward, size: 20),
                 label: Text(
                   '¡A cocinar!',
                   style: GoogleFonts.nunito(
-                      fontSize: 16, fontWeight: FontWeight.w700),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8490F),
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor:
-                      const Color(0xFFE8490F).withValues(alpha: 0.35),
+                  disabledBackgroundColor: const Color(
+                    0xFFE8490F,
+                  ).withValues(alpha: 0.35),
                   disabledForegroundColor: Colors.white70,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                   elevation: 0,
                 ),
               ),
@@ -877,8 +905,7 @@ class _CookingModeScreenState extends State<CookingModeScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.flag_outlined,
-              color: Color(0xFFE8490F), size: 18),
+          const Icon(Icons.flag_outlined, color: Color(0xFFE8490F), size: 18),
           const SizedBox(width: 8),
           Text(
             '$done de $total pasos completados',
@@ -898,10 +925,11 @@ class _CookingModeScreenState extends State<CookingModeScreen>
     final exit = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('¿Salir del Modo Cocinero?',
-            style: GoogleFonts.playfairDisplay(fontSize: 18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          '¿Salir del Modo Cocinero?',
+          style: GoogleFonts.playfairDisplay(fontSize: 18),
+        ),
         content: Text(
           'Perderás el progreso actual de esta sesión.',
           style: GoogleFonts.nunito(fontSize: 14, color: Colors.grey[600]),
@@ -909,8 +937,10 @@ class _CookingModeScreenState extends State<CookingModeScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child:
-                Text('Continuar', style: GoogleFonts.nunito(color: Colors.grey)),
+            child: Text(
+              'Continuar',
+              style: GoogleFonts.nunito(color: Colors.grey),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -918,11 +948,13 @@ class _CookingModeScreenState extends State<CookingModeScreen>
               backgroundColor: const Color(0xFFE8490F),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            child: Text('Salir',
-                style:
-                    GoogleFonts.nunito(fontWeight: FontWeight.w700)),
+            child: Text(
+              'Salir',
+              style: GoogleFonts.nunito(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -938,10 +970,11 @@ class _StepBubble extends StatelessWidget {
   final bool isDone;
   final bool isActive;
 
-  const _StepBubble(
-      {required this.number,
-      required this.isDone,
-      required this.isActive});
+  const _StepBubble({
+    required this.number,
+    required this.isDone,
+    required this.isActive,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -956,15 +989,25 @@ class _StepBubble extends StatelessWidget {
     } else if (isActive) {
       bg = const Color(0xFFE8490F);
       fg = Colors.white;
-      child = Text('$number',
-          style: GoogleFonts.nunito(
-              color: fg, fontWeight: FontWeight.bold, fontSize: 13));
+      child = Text(
+        '$number',
+        style: GoogleFonts.nunito(
+          color: fg,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      );
     } else {
       bg = const Color(0xFFEEEEEE);
       fg = const Color(0xFF999999);
-      child = Text('$number',
-          style: GoogleFonts.nunito(
-              color: fg, fontWeight: FontWeight.bold, fontSize: 13));
+      child = Text(
+        '$number',
+        style: GoogleFonts.nunito(
+          color: fg,
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+        ),
+      );
     }
 
     return AnimatedContainer(
@@ -982,8 +1025,11 @@ class _TimerBtn extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _TimerBtn(
-      {required this.icon, required this.color, required this.onTap});
+  const _TimerBtn({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

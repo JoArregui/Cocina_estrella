@@ -10,12 +10,23 @@ void main() {
     test('getCategories parses correctly', () async {
       final mockClient = MockClient((request) async {
         expect(request.url.toString(), contains('categories.php'));
-        return http.Response(jsonEncode({
-          'categories': [
-            {'strCategory': 'Beef', 'strCategoryThumb': 'https://example.com/beef.jpg', 'strCategoryDescription': 'Desc'},
-            {'strCategory': 'Chicken', 'strCategoryThumb': 'https://example.com/chicken.jpg', 'strCategoryDescription': 'Desc2'},
-          ]
-        }), 200);
+        return http.Response(
+          jsonEncode({
+            'categories': [
+              {
+                'strCategory': 'Beef',
+                'strCategoryThumb': 'https://example.com/beef.jpg',
+                'strCategoryDescription': 'Desc',
+              },
+              {
+                'strCategory': 'Chicken',
+                'strCategoryThumb': 'https://example.com/chicken.jpg',
+                'strCategoryDescription': 'Desc2',
+              },
+            ],
+          }),
+          200,
+        );
       });
 
       final service = MealService(client: mockClient);
@@ -26,7 +37,9 @@ void main() {
     });
 
     test('searchMeals returns empty on null', () async {
-      final mockClient = MockClient((_) async => http.Response(jsonEncode({'meals': null}), 200));
+      final mockClient = MockClient(
+        (_) async => http.Response(jsonEncode({'meals': null}), 200),
+      );
       final service = MealService(client: mockClient);
       final results = await service.searchMeals('nonexistent');
       expect(results, isEmpty);
@@ -43,7 +56,10 @@ void main() {
         throw const SocketException('Failed host lookup');
       });
       final service = MealService(client: mockClient);
-      expect(() => service.getCategories(), throwsA(predicate((e) => e.toString().contains('Sin conexión'))));
+      expect(
+        () => service.getCategories(),
+        throwsA(predicate((e) => e.toString().contains('Sin conexión'))),
+      );
     });
   });
 }

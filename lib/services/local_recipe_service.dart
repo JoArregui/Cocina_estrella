@@ -8,25 +8,34 @@ class LocalRecipeService {
 
   Future<List<Meal>> getAll() async {
     final rows = await AppDatabase.getUserRecipes();
-    return rows.map((r) {
-      try {
-        return Meal.fromJson(jsonDecode(r['json'] as String) as Map<String, dynamic>);
-      } catch (_) {
-        return null;
-      }
-    }).whereType<Meal>().toList();
+    return rows
+        .map((r) {
+          try {
+            return Meal.fromJson(
+              jsonDecode(r['json'] as String) as Map<String, dynamic>,
+            );
+          } catch (_) {
+            return null;
+          }
+        })
+        .whereType<Meal>()
+        .toList();
   }
 
   Future<List<MealSummary>> getSummaries() async {
     final meals = await getAll();
-    return meals.map((m) => MealSummary(id: m.id, name: m.name, thumbnail: m.thumbnail)).toList();
+    return meals
+        .map((m) => MealSummary(id: m.id, name: m.name, thumbnail: m.thumbnail))
+        .toList();
   }
 
   Future<Meal?> getById(String id) async {
     final row = await AppDatabase.getUserRecipe(id);
     if (row == null) return null;
     try {
-      return Meal.fromJson(jsonDecode(row['json'] as String) as Map<String, dynamic>);
+      return Meal.fromJson(
+        jsonDecode(row['json'] as String) as Map<String, dynamic>,
+      );
     } catch (_) {
       return null;
     }
@@ -57,7 +66,7 @@ class LocalRecipeService {
       for (int i = 0; i < toSave.ingredients.length; i++) ...{
         'strIngredient${i + 1}': toSave.ingredients[i].name,
         'strMeasure${i + 1}': toSave.ingredients[i].measure,
-      }
+      },
     });
     await AppDatabase.insertUserRecipe(id, json);
     return id;
@@ -76,7 +85,7 @@ class LocalRecipeService {
       for (int i = 0; i < meal.ingredients.length; i++) ...{
         'strIngredient${i + 1}': meal.ingredients[i].name,
         'strMeasure${i + 1}': meal.ingredients[i].measure,
-      }
+      },
     });
     await AppDatabase.updateUserRecipe(id, json);
   }

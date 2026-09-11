@@ -55,14 +55,22 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     super.dispose();
   }
 
-  void _addIngredient() => setState(() { _ingNames.add(TextEditingController()); _ingMeasures.add(TextEditingController()); });
+  void _addIngredient() => setState(() {
+    _ingNames.add(TextEditingController());
+    _ingMeasures.add(TextEditingController());
+  });
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final ings = <MealIngredient>[];
-    for (int i=0;i<_ingNames.length;i++) {
+    for (int i = 0; i < _ingNames.length; i++) {
       if (_ingNames[i].text.trim().isEmpty) continue;
-      ings.add(MealIngredient(name: _ingNames[i].text.trim(), measure: _ingMeasures[i].text.trim()));
+      ings.add(
+        MealIngredient(
+          name: _ingNames[i].text.trim(),
+          measure: _ingMeasures[i].text.trim(),
+        ),
+      );
     }
     final meal = Meal(
       id: widget.existing?.id ?? '',
@@ -70,7 +78,9 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
       category: _category.text.trim(),
       area: _area.text.trim(),
       instructions: _instructions.text.trim(),
-      thumbnail: _thumbnail.text.trim().isEmpty ? 'https://via.placeholder.com/400x300.png?text=Mi+Receta' : _thumbnail.text.trim(),
+      thumbnail: _thumbnail.text.trim().isEmpty
+          ? 'https://via.placeholder.com/400x300.png?text=Mi+Receta'
+          : _thumbnail.text.trim(),
       ingredients: ings,
     );
     final svc = LocalRecipeService();
@@ -83,17 +93,33 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
     }
     ref.invalidate(userRecipesProvider);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Receta guardada')));
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(mealId: id, isLocal: true)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Receta guardada')));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => RecipeDetailScreen(mealId: id, isLocal: true),
+        ),
+      );
     }
   }
 
   Future<void> _generateWithAI() async {
-    final prompt = _name.text.trim().isEmpty ? 'Receta original con ${_ingNames.where((c)=>c.text.isNotEmpty).map((c)=>c.text).join(', ')}' : _name.text.trim();
+    final prompt = _name.text.trim().isEmpty
+        ? 'Receta original con ${_ingNames.where((c) => c.text.isNotEmpty).map((c) => c.text).join(', ')}'
+        : _name.text.trim();
     try {
-      showDialog(context: context, barrierDismissible: false, builder: (_) => const Center(child: CircularProgressIndicator()));
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
       final ai = ref.read(aiRecipeGeneratorProvider);
-      final generated = await ai.generateFromPrompt(prompt, thumbnail: _thumbnail.text.trim());
+      final generated = await ai.generateFromPrompt(
+        prompt,
+        thumbnail: _thumbnail.text.trim(),
+      );
       if (mounted) Navigator.pop(context);
       setState(() {
         _name.text = generated.name;
@@ -114,7 +140,12 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
         }
       });
     } catch (e) {
-      if (mounted) { Navigator.pop(context); ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('IA: ${e.toString()}'))); }
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('IA: ${e.toString()}')));
+      }
     }
   }
 
@@ -122,21 +153,143 @@ class _RecipeFormScreenState extends ConsumerState<RecipeFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F4F0),
-      appBar: AppBar(backgroundColor: const Color(0xFFF8F4F0), title: Text(widget.existing==null?'Nueva receta':'Editar receta', style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold)), iconTheme: const IconThemeData(color: Color(0xFF1A1A1A)), actions: [TextButton.icon(onPressed: _generateWithAI, icon: const Icon(Icons.auto_awesome, size: 18, color: Color(0xFFE8490F)), label: Text('IA', style: GoogleFonts.nunito(color: const Color(0xFFE8490F), fontWeight: FontWeight.bold)))]),
-      body: Form(key: _formKey, child: ListView(padding: const EdgeInsets.all(16), children: [
-        TextFormField(controller: _name, decoration: const InputDecoration(labelText: 'Nombre'), validator: (v)=>v!.isEmpty?'Requerido':null),
-        const SizedBox(height: 12),
-        Row(children: [Expanded(child: TextFormField(controller: _category, decoration: const InputDecoration(labelText: 'Categoría'))), const SizedBox(width: 12), Expanded(child: TextFormField(controller: _area, decoration: const InputDecoration(labelText: 'Origen')))]),
-        const SizedBox(height: 12),
-        TextFormField(controller: _thumbnail, decoration: const InputDecoration(labelText: 'URL imagen (opcional)')),
-        const SizedBox(height: 16),
-        Row(children: [Text('Ingredientes', style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold, fontSize: 16)), const Spacer(), IconButton(onPressed: _addIngredient, icon: const Icon(Icons.add_circle, color: Color(0xFFE8490F)))]),
-        ...List.generate(_ingNames.length, (i) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Row(children: [Expanded(flex: 3, child: TextFormField(controller: _ingNames[i], decoration: InputDecoration(labelText: 'Ingrediente ${i+1}'))), const SizedBox(width: 8), Expanded(flex: 2, child: TextFormField(controller: _ingMeasures[i], decoration: const InputDecoration(labelText: 'Medida'))), IconButton(onPressed: ()=> setState(() { _ingNames.removeAt(i); _ingMeasures.removeAt(i); }), icon: const Icon(Icons.close, size: 18))]))),
-        const SizedBox(height: 16),
-        TextFormField(controller: _instructions, decoration: const InputDecoration(labelText: 'Instrucciones (un paso por línea)'), maxLines: 6, validator: (v)=>v!.isEmpty?'Requerido':null),
-        const SizedBox(height: 24),
-        ElevatedButton.icon(onPressed: _save, icon: const Icon(Icons.save), label: Text(widget.existing==null?'Guardar receta':'Actualizar', style: GoogleFonts.nunito(fontWeight: FontWeight.bold)), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE8490F), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16))),
-      ])),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF8F4F0),
+        title: Text(
+          widget.existing == null ? 'Nueva receta' : 'Editar receta',
+          style: GoogleFonts.playfairDisplay(fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Color(0xFF1A1A1A)),
+        actions: [
+          TextButton.icon(
+            onPressed: _generateWithAI,
+            icon: const Icon(
+              Icons.auto_awesome,
+              size: 18,
+              color: Color(0xFFE8490F),
+            ),
+            label: Text(
+              'IA',
+              style: GoogleFonts.nunito(
+                color: const Color(0xFFE8490F),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            TextFormField(
+              controller: _name,
+              decoration: const InputDecoration(labelText: 'Nombre'),
+              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _category,
+                    decoration: const InputDecoration(labelText: 'Categoría'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _area,
+                    decoration: const InputDecoration(labelText: 'Origen'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _thumbnail,
+              decoration: const InputDecoration(
+                labelText: 'URL imagen (opcional)',
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Text(
+                  'Ingredientes',
+                  style: GoogleFonts.playfairDisplay(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: _addIngredient,
+                  icon: const Icon(Icons.add_circle, color: Color(0xFFE8490F)),
+                ),
+              ],
+            ),
+            ...List.generate(
+              _ingNames.length,
+              (i) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: TextFormField(
+                        controller: _ingNames[i],
+                        decoration: InputDecoration(
+                          labelText: 'Ingrediente ${i + 1}',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 2,
+                      child: TextFormField(
+                        controller: _ingMeasures[i],
+                        decoration: const InputDecoration(labelText: 'Medida'),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => setState(() {
+                        _ingNames.removeAt(i);
+                        _ingMeasures.removeAt(i);
+                      }),
+                      icon: const Icon(Icons.close, size: 18),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _instructions,
+              decoration: const InputDecoration(
+                labelText: 'Instrucciones (un paso por línea)',
+              ),
+              maxLines: 6,
+              validator: (v) => v!.isEmpty ? 'Requerido' : null,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _save,
+              icon: const Icon(Icons.save),
+              label: Text(
+                widget.existing == null ? 'Guardar receta' : 'Actualizar',
+                style: GoogleFonts.nunito(fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE8490F),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

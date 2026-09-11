@@ -41,7 +41,8 @@ class OpenRouterService implements AIService {
     return '';
   }
 
-  static String get aiProvider => const String.fromEnvironment('AI_PROVIDER', defaultValue: 'muse-spark');
+  static String get aiProvider =>
+      const String.fromEnvironment('AI_PROVIDER', defaultValue: 'muse-spark');
   static String get customModel => const String.fromEnvironment('AI_MODEL');
 
   @override
@@ -61,14 +62,17 @@ class OpenRouterService implements AIService {
   }
 
   String _imageModel() {
-    if (customModel.isNotEmpty && customModel.contains('vision')) return customModel;
+    if (customModel.isNotEmpty && customModel.contains('vision'))
+      return customModel;
     return _visionModel;
   }
 
   @override
   Future<GeminiResult> analyze({File? image, String? textIngredients}) async {
     if (!isConfigured) {
-      throw Exception('OPENROUTER_API_KEY no configurada. Define --dart-define=OPENROUTER_API_KEY=sk-or-... o usa GEMINI_API_KEY');
+      throw Exception(
+        'OPENROUTER_API_KEY no configurada. Define --dart-define=OPENROUTER_API_KEY=sk-or-... o usa GEMINI_API_KEY',
+      );
     }
     if (image != null) {
       return _analyzeImage(image);
@@ -102,7 +106,7 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
     final body = jsonEncode({
       'model': _textModel(),
       'messages': [
-        {'role': 'user', 'content': prompt}
+        {'role': 'user', 'content': prompt},
       ],
       'temperature': 0.7,
       'max_tokens': 1024,
@@ -116,7 +120,8 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
     final b64 = base64Encode(bytes);
     final dataUrl = 'data:image/jpeg;base64,$b64';
 
-    const prompt = '''Analiza la imagen y detecta todos los ingredientes de cocina que ves.
+    const prompt =
+        '''Analiza la imagen y detecta todos los ingredientes de cocina que ves.
 Luego sugiere 5 platos que se puedan cocinar con esos ingredientes.
 
 Responde SOLO con este JSON (sin markdown, sin texto extra):
@@ -141,9 +146,12 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
           'role': 'user',
           'content': [
             {'type': 'text', 'text': prompt},
-            {'type': 'image_url', 'image_url': {'url': dataUrl}}
-          ]
-        }
+            {
+              'type': 'image_url',
+              'image_url': {'url': dataUrl},
+            },
+          ],
+        },
       ],
       'temperature': 0.7,
       'max_tokens': 1024,
@@ -167,17 +175,25 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
         .timeout(_timeout);
 
     if (response.statusCode == 401) {
-      throw Exception('OPENROUTER_API_KEY inválida (401). Revisa https://openrouter.ai/keys');
+      throw Exception(
+        'OPENROUTER_API_KEY inválida (401). Revisa https://openrouter.ai/keys',
+      );
     }
     if (response.statusCode == 429) {
-      throw Exception('Rate limit OpenRouter (429). Prueba en unos segundos o usa GEMINI_PROXY_URL');
+      throw Exception(
+        'Rate limit OpenRouter (429). Prueba en unos segundos o usa GEMINI_PROXY_URL',
+      );
     }
     if (response.statusCode != 200) {
       try {
         final err = jsonDecode(response.body);
-        throw Exception(err['error']?['message'] ?? 'OpenRouter HTTP ${response.statusCode}');
+        throw Exception(
+          err['error']?['message'] ?? 'OpenRouter HTTP ${response.statusCode}',
+        );
       } catch (_) {
-        throw Exception('Error OpenRouter HTTP ${response.statusCode}: ${response.body}');
+        throw Exception(
+          'Error OpenRouter HTTP ${response.statusCode}: ${response.body}',
+        );
       }
     }
 
@@ -186,14 +202,20 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
     String clean = rawText.trim();
     // Limpia markdown ```json ``` si el modelo lo añade
     if (clean.startsWith('```')) {
-      clean = clean.replaceAll(RegExp(r'^```(?:json)?\s*'), '').replaceAll(RegExp(r'\s*```$'), '');
+      clean = clean
+          .replaceAll(RegExp(r'^```(?:json)?\s*'), '')
+          .replaceAll(RegExp(r'\s*```$'), '');
     }
     final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(clean);
     if (jsonMatch != null) clean = jsonMatch.group(0)!;
     final parsed = jsonDecode(clean);
 
-    final ingredients = (parsed['ingredients'] as List).map((e) => e.toString()).toList();
-    final suggestions = (parsed['suggestions'] as List).map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>)).toList();
+    final ingredients = (parsed['ingredients'] as List)
+        .map((e) => e.toString())
+        .toList();
+    final suggestions = (parsed['suggestions'] as List)
+        .map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>))
+        .toList();
 
     return GeminiResult(ingredients: ingredients, suggestions: suggestions);
   }

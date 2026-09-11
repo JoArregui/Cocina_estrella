@@ -18,9 +18,12 @@ class UnifiedRecipeRepository {
   Future<List<String>> getAreas() => _mealService.getAreas();
   Future<List<String>> getIngredientList() => _mealService.getIngredientList();
 
-  Future<List<MealSummary>> getMealsByCategory(String c) => _mealRepo.getMealsByCategory(c);
-  Future<List<MealSummary>> getMealsByArea(String a) => _mealService.getMealsByArea(a);
-  Future<List<MealSummary>> getMealsByIngredient(String i) => _mealService.getMealsByIngredient(i);
+  Future<List<MealSummary>> getMealsByCategory(String c) =>
+      _mealRepo.getMealsByCategory(c);
+  Future<List<MealSummary>> getMealsByArea(String a) =>
+      _mealService.getMealsByArea(a);
+  Future<List<MealSummary>> getMealsByIngredient(String i) =>
+      _mealService.getMealsByIngredient(i);
 
   Future<List<MealSummary>> search(String query) async {
     final local = await _mealRepo.searchMeals(query);

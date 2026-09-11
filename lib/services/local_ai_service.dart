@@ -9,7 +9,8 @@ import 'gemini_service.dart';
 /// Útil para que Chef IA funcione "out of the box" sin configurar nada.
 class LocalAIService implements AIService {
   final MealService _mealService;
-  LocalAIService({MealService? mealService}) : _mealService = mealService ?? MealService();
+  LocalAIService({MealService? mealService})
+    : _mealService = mealService ?? MealService();
 
   @override
   String get providerName => 'local:themealdb';
@@ -20,13 +21,19 @@ class LocalAIService implements AIService {
   @override
   Future<GeminiResult> analyze({File? image, String? textIngredients}) async {
     if (image != null) {
-      throw Exception('Análisis de foto requiere IA (configura OPENROUTER_API_KEY o GEMINI_API_KEY). Por ahora usa "Escribir lista".');
+      throw Exception(
+        'Análisis de foto requiere IA (configura OPENROUTER_API_KEY o GEMINI_API_KEY). Por ahora usa "Escribir lista".',
+      );
     }
     if (textIngredients == null || textIngredients.trim().isEmpty) {
       throw Exception('Escribe al menos un ingrediente');
     }
 
-    final parts = textIngredients.split(RegExp(r'[,;\n]+')).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+    final parts = textIngredients
+        .split(RegExp(r'[,;\n]+'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
     if (parts.isEmpty) throw Exception('No se detectaron ingredientes');
 
     final normalized = parts.map((p) => p.toLowerCase()).toList();
@@ -66,20 +73,39 @@ class LocalAIService implements AIService {
     }
 
     final take = candidates.take(5).toList();
-    final suggestions = take.map((m) => RecipeSuggestion(
-          name: m.name,
-          nameEs: m.name,
-          description: 'Receta con ${parts.join(', ')} (sugerencia local TheMealDB)',
-          difficulty: 'Fácil',
-          time: '30 min',
-          matchPercent: 70,
-        )).toList();
+    final suggestions = take
+        .map(
+          (m) => RecipeSuggestion(
+            name: m.name,
+            nameEs: m.name,
+            description:
+                'Receta con ${parts.join(', ')} (sugerencia local TheMealDB)',
+            difficulty: 'Fácil',
+            time: '30 min',
+            matchPercent: 70,
+          ),
+        )
+        .toList();
 
     // Si aún vacío, devuelve sugerencias genéricas
     if (suggestions.isEmpty) {
       suggestions.addAll([
-        RecipeSuggestion(name: 'Chicken Handi', nameEs: 'Pollo Handi', description: 'Pollo cremoso con especias', difficulty: 'Media', time: '45 min', matchPercent: 60),
-        RecipeSuggestion(name: 'Pasta Primavera', nameEs: 'Pasta Primavera', description: 'Pasta con verduras', difficulty: 'Fácil', time: '25 min', matchPercent: 55),
+        RecipeSuggestion(
+          name: 'Chicken Handi',
+          nameEs: 'Pollo Handi',
+          description: 'Pollo cremoso con especias',
+          difficulty: 'Media',
+          time: '45 min',
+          matchPercent: 60,
+        ),
+        RecipeSuggestion(
+          name: 'Pasta Primavera',
+          nameEs: 'Pasta Primavera',
+          description: 'Pasta con verduras',
+          difficulty: 'Fácil',
+          time: '25 min',
+          matchPercent: 55,
+        ),
       ]);
     }
 

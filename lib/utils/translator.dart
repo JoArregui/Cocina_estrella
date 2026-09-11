@@ -84,7 +84,9 @@ class Translator {
     // Medidas como "1 cup" o "2 tbsp" se traducen por partes si es posible sin red
     if (RegExp(r'^[\d\/\.\s]+[a-zA-Z]+$').hasMatch(key)) {
       final parts = key.split(RegExp(r'\s+'));
-      final translatedParts = parts.map((p) => _measureDict[p.toLowerCase()] ?? p).toList();
+      final translatedParts = parts
+          .map((p) => _measureDict[p.toLowerCase()] ?? p)
+          .toList();
       if (translatedParts.join(' ') != key) {
         final joined = translatedParts.join(' ');
         _cache[key] = joined;

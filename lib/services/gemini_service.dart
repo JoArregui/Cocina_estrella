@@ -51,26 +51,27 @@ class GeminiService implements AIService {
   String get providerName => _useProxy ? 'gemini:proxy' : 'gemini:$_model';
 
   @override
-  bool get isConfigured => _useProxy || ApiKeyService.isValid(ApiKeyService.getKey());
+  bool get isConfigured =>
+      _useProxy || ApiKeyService.isValid(ApiKeyService.getKey());
 
   /// Si se define GEMINI_PROXY_URL vía --dart-define, todas las llamadas
   /// van al backend proxy (Cloud Functions / Cloud Run) que custodia la key.
   /// Ejemplo: --dart-define=GEMINI_PROXY_URL=https://api.tuapp.com/gemini
   /// El proxy debe exponer POST /analyze con {parts, generationConfig}
   /// y devolver el mismo JSON que Gemini.
-  static String get proxyUrl => const String.fromEnvironment('GEMINI_PROXY_URL');
+  static String get proxyUrl =>
+      const String.fromEnvironment('GEMINI_PROXY_URL');
 
   bool get _useProxy => proxyUrl.isNotEmpty;
 
   @override
-  Future<GeminiResult> analyze({
-    File? image,
-    String? textIngredients,
-  }) async {
+  Future<GeminiResult> analyze({File? image, String? textIngredients}) async {
     if (!_useProxy) {
       final apiKey = ApiKeyService.getKey();
       if (!ApiKeyService.isValid(apiKey)) {
-        throw Exception('API Key no configurada. Define GEMINI_API_KEY vía --dart-define o .env, o configura GEMINI_PROXY_URL');
+        throw Exception(
+          'API Key no configurada. Define GEMINI_API_KEY vía --dart-define o .env, o configura GEMINI_PROXY_URL',
+        );
       }
     }
 
@@ -80,10 +81,11 @@ class GeminiService implements AIService {
       final bytes = await image.readAsBytes();
       final b64 = base64Encode(bytes);
       parts.add({
-        'inline_data': {'mime_type': 'image/jpeg', 'data': b64}
+        'inline_data': {'mime_type': 'image/jpeg', 'data': b64},
       });
       parts.add({
-        'text': '''Analiza la imagen y detecta todos los ingredientes de cocina que ves.
+        'text':
+            '''Analiza la imagen y detecta todos los ingredientes de cocina que ves.
 Luego sugiere 5 platos que se puedan cocinar con esos ingredientes.
 
 Responde SOLO con este JSON (sin markdown, sin texto extra):
@@ -99,7 +101,7 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
       "match_percent": 90
     }
   ]
-}'''
+}''',
       });
     } else if (textIngredients != null && textIngredients.trim().isNotEmpty) {
       parts.add({
@@ -120,7 +122,7 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
       "match_percent": 90
     }
   ]
-}'''
+}''',
       });
     } else {
       throw Exception('Debes proporcionar imagen o lista de ingredientes');
@@ -134,15 +136,27 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
       // Modo proxy: la key no sale del backend
       uri = Uri.parse('$proxyUrl/analyze');
       headers = {'Content-Type': 'application/json'};
-      body = jsonEncode({'parts': parts, 'generationConfig': {'maxOutputTokens': 1024, 'temperature': 0.7}});
+      body = jsonEncode({
+        'parts': parts,
+        'generationConfig': {'maxOutputTokens': 1024, 'temperature': 0.7},
+      });
     } else {
       final apiKey = ApiKeyService.getKey()!;
-      uri = Uri.parse('https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$apiKey');
+      uri = Uri.parse(
+        'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$apiKey',
+      );
       headers = {'Content-Type': 'application/json'};
-      body = jsonEncode({'contents': [{'parts': parts}], 'generationConfig': {'maxOutputTokens': 1024, 'temperature': 0.7}});
+      body = jsonEncode({
+        'contents': [
+          {'parts': parts},
+        ],
+        'generationConfig': {'maxOutputTokens': 1024, 'temperature': 0.7},
+      });
     }
 
-    final response = await _client.post(uri, headers: headers, body: body).timeout(_timeout);
+    final response = await _client
+        .post(uri, headers: headers, body: body)
+        .timeout(_timeout);
 
     if (response.statusCode == 400 || response.statusCode == 403) {
       throw Exception('API Key inválida (HTTP ${response.statusCode})');
@@ -150,7 +164,9 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
     if (response.statusCode != 200) {
       try {
         final body = jsonDecode(response.body);
-        throw Exception(body['error']?['message'] ?? 'HTTP ${response.statusCode}');
+        throw Exception(
+          body['error']?['message'] ?? 'HTTP ${response.statusCode}',
+        );
       } catch (_) {
         throw Exception('Error Gemini HTTP ${response.statusCode}');
       }
@@ -158,19 +174,30 @@ Responde SOLO con este JSON (sin markdown, sin texto extra):
 
     final data = jsonDecode(response.body);
     // Proxy devuelve directamente {ingredients, suggestions} o formato Gemini
-    if (data is Map && data.containsKey('ingredients') && data.containsKey('suggestions')) {
-      final ingredients = (data['ingredients'] as List).map((e) => e.toString()).toList();
-      final suggestions = (data['suggestions'] as List).map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>)).toList();
+    if (data is Map &&
+        data.containsKey('ingredients') &&
+        data.containsKey('suggestions')) {
+      final ingredients = (data['ingredients'] as List)
+          .map((e) => e.toString())
+          .toList();
+      final suggestions = (data['suggestions'] as List)
+          .map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>))
+          .toList();
       return GeminiResult(ingredients: ingredients, suggestions: suggestions);
     }
-    final rawText = data['candidates'][0]['content']['parts'][0]['text'] as String;
+    final rawText =
+        data['candidates'][0]['content']['parts'][0]['text'] as String;
     String clean = rawText.trim();
     final jsonMatch = RegExp(r'\{[\s\S]*\}').firstMatch(clean);
     if (jsonMatch != null) clean = jsonMatch.group(0)!;
     final parsed = jsonDecode(clean);
 
-    final ingredients = (parsed['ingredients'] as List).map((e) => e.toString()).toList();
-    final suggestions = (parsed['suggestions'] as List).map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>)).toList();
+    final ingredients = (parsed['ingredients'] as List)
+        .map((e) => e.toString())
+        .toList();
+    final suggestions = (parsed['suggestions'] as List)
+        .map((s) => RecipeSuggestion.fromJson(s as Map<String, dynamic>))
+        .toList();
 
     return GeminiResult(ingredients: ingredients, suggestions: suggestions);
   }
