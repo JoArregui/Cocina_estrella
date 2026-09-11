@@ -587,13 +587,14 @@ class _IngredientScanScreenState extends ConsumerState<IngredientScanScreen>
           suggestion: s,
           meal: meal,
           onTap: () {
-            if (meal != null && meal.id.isNotEmpty)
+            if (meal != null && meal.id.isNotEmpty) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => RecipeDetailScreen(mealId: meal.id),
                 ),
               );
+            }
           },
           onCookingMode: () => _openCookingMode(s, meal, state.ingredients),
         );

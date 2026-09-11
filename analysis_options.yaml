@@ -19,6 +19,7 @@ linter:
     avoid_type_to_string: true
     cancel_subscriptions: true
     close_sinks: true
+    curly_braces_in_flow_control_structures: false
     prefer_const_constructors: true
     prefer_const_declarations: true
     use_key_in_widget_constructors: true

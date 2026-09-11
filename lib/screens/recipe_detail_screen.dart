@@ -710,10 +710,11 @@ class _RecipeDetailScreenState extends ConsumerState<RecipeDetailScreen> {
         .map((l) => l.trim())
         .where((l) => l.isNotEmpty)
         .toList();
-    if (lines.isNotEmpty && RegExp(r'^\d+\.').hasMatch(lines.first))
+    if (lines.isNotEmpty && RegExp(r'^\d+\.').hasMatch(lines.first)) {
       return lines
           .map((l) => l.replaceFirst(RegExp(r'^\d+\.\s*'), ''))
           .toList();
+    }
     if (lines.length == 1) {
       final byDot = lines.first
           .split(RegExp(r'\.\s+'))

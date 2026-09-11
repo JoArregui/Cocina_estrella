@@ -24,11 +24,13 @@ int? detectTimerSeconds(String text) {
   final horaMatch = patterns[6].firstMatch(lower);
   if (horaMatch != null) total += int.parse(horaMatch.group(1)!) * 3600;
   final minutoMatch = patterns[7].firstMatch(lower);
-  if (minutoMatch != null && minMatch == null)
+  if (minutoMatch != null && minMatch == null) {
     total += int.parse(minutoMatch.group(1)!) * 60;
+  }
   final segundoMatch = patterns[8].firstMatch(lower);
-  if (segundoMatch != null && secMatch == null)
+  if (segundoMatch != null && secMatch == null) {
     total += int.parse(segundoMatch.group(1)!);
+  }
   return total > 0 ? total : null;
 }
 

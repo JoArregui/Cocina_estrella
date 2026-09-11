@@ -66,23 +66,26 @@ Responde SOLO con JSON (sin markdown):
             }),
           )
           .timeout(const Duration(seconds: 25));
-      if (res.statusCode != 200)
+      if (res.statusCode != 200) {
         throw Exception('IA HTTP ${res.statusCode}: ${res.body}');
+      }
       final data = jsonDecode(res.body);
       String content = data['choices'][0]['message']['content']
           .toString()
           .trim();
-      if (content.startsWith('```'))
+      if (content.startsWith('```')) {
         content = content
             .replaceAll(RegExp(r'^```(?:json)?\s*'), '')
             .replaceAll(RegExp(r'\s*```$'), '');
+      }
       final m = RegExp(r'\{[\s\S]*\}').firstMatch(content);
       if (m != null) content = m.group(0)!;
       return content;
     } else {
       final apiKey = ApiKeyService.getKey();
-      if (!ApiKeyService.isValid(apiKey))
+      if (!ApiKeyService.isValid(apiKey)) {
         throw Exception('Configura OPENROUTER_API_KEY o GEMINI_API_KEY');
+      }
       final res = await _client
           .post(
             Uri.parse(
@@ -101,8 +104,9 @@ Responde SOLO con JSON (sin markdown):
             }),
           )
           .timeout(const Duration(seconds: 20));
-      if (res.statusCode != 200)
+      if (res.statusCode != 200) {
         throw Exception('Gemini HTTP ${res.statusCode}');
+      }
       final data = jsonDecode(res.body);
       String content = data['candidates'][0]['content']['parts'][0]['text']
           .toString()

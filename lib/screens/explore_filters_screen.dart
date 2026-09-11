@@ -146,8 +146,9 @@ class _ResultsGrid extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Text(e.toString()),
       data: (meals) {
-        if (meals.isEmpty)
+        if (meals.isEmpty) {
           return Text('Sin resultados', style: GoogleFonts.nunito());
+        }
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),

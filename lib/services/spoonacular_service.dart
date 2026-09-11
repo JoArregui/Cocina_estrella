@@ -35,10 +35,12 @@ class SpoonacularService {
       '$_baseUrl/recipes/complexSearch?query=${Uri.encodeComponent(query)}&number=10&apiKey=$apiKey',
     );
     final res = await _get(uri);
-    if (res.statusCode == 402)
+    if (res.statusCode == 402) {
       throw Exception('Límite Spoonacular alcanzado (402)');
-    if (res.statusCode != 200)
+    }
+    if (res.statusCode != 200) {
       throw Exception('Spoonacular HTTP ${res.statusCode}');
+    }
     try {
       final data = jsonDecode(res.body) as Map<String, dynamic>;
       final results = (data['results'] as List?) ?? [];

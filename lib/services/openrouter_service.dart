@@ -62,8 +62,9 @@ class OpenRouterService implements AIService {
   }
 
   String _imageModel() {
-    if (customModel.isNotEmpty && customModel.contains('vision'))
+    if (customModel.isNotEmpty && customModel.contains('vision')) {
       return customModel;
+    }
     return _visionModel;
   }
 
